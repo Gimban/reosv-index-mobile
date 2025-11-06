@@ -1,3 +1,7 @@
+export const appBar = {
+  flexShrink: 0,
+};
+
 export const toolbar = {
   minHeight: 56,
 };

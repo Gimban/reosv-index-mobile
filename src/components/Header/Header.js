@@ -4,7 +4,7 @@ import * as styles from "./Header.styles";
 
 export default function Header() {
   return (
-    <AppBar position="static">
+    <AppBar position="static" sx={styles.appBar}>
       <Toolbar sx={styles.toolbar}>
         <Typography variant="h6" sx={styles.title}>
           My Mobile App

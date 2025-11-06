@@ -1,4 +1,5 @@
 export const main = {
+  flex: 1,
   overflowY: "auto",
 };
 

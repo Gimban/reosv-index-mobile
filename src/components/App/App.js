@@ -11,7 +11,7 @@ export default function App() {
 
   return (
     <Box sx={styles.root}>
-      <Paper elevation={0} sx={styles.frame}>
+      <Paper elevation={0} square sx={styles.frame}>
         <Header />
         <MainContent />
         <BottomNav value={tab} onChange={handleTabChange} />
