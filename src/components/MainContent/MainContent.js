@@ -1,4 +1,5 @@
 import React from "react";
+import { Link as RouterLink } from "react-router-dom";
 import { Box, Button, Container, Paper, Typography } from "@mui/material";
 import * as styles from "./MainContent.styles";
 
@@ -8,6 +9,15 @@ export default function MainContent() {
   return (
     <Box component="main" sx={styles.main}>
       <Container sx={styles.container}>
+        {/* 구글 시트 데이터 페이지로 이동하는 버튼 추가 */}
+        <Button
+          component={RouterLink}
+          to="/sheet"
+          variant="contained"
+          sx={{ mb: 4 }}
+        >
+          시트 데이터 보러가기
+        </Button>
         <Typography variant="h5" sx={styles.heading}>
           Mobile List Cards
         </Typography>
