@@ -5,10 +5,12 @@ import Header from "../Header";
 import MainContent from "../MainContent";
 import BottomNav from "../BottomNav";
 import SheetData from "../SheetData";
+import SideDrawer from "../SideDrawer"; // SideDrawer import
 import * as styles from "./App.styles";
 
 export default function App() {
   const [tab, setTab] = useState(0);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Drawer 상태 추가
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -45,16 +47,34 @@ export default function App() {
     }
   };
 
+  const handleDrawerOpen = () => {
+    setIsDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setIsDrawerOpen(false);
+  };
+
+  const handleMenuItemClick = (path) => {
+    navigate(path);
+    setIsDrawerOpen(false);
+  };
+
   return (
     <Box sx={styles.root}>
+      <SideDrawer
+        open={isDrawerOpen}
+        onClose={handleDrawerClose}
+        onMenuItemClick={handleMenuItemClick}
+      />
       <Paper elevation={0} square sx={styles.frame}>
-        <Header />
+        <Header onMenuClick={handleDrawerOpen} />
         {/* 라우트 설정 */}
         <Routes>
           <Route path="/" element={<MainContent />} />
           <Route path="sheet" element={<SheetData />} />
-          <Route path="/search" element={<box sx={{p: 2, textAlign: "center"}}>Search Page</box>} />
-          <Route path="/profile" element={<box sx={{p: 2, textAlign: "center"}}>Profile Page</box>} />
+          <Route path="/search" element={<Box sx={{p: 2, textAlign: "center"}}>Search Page</Box>} />
+          <Route path="/profile" element={<Box sx={{p: 2, textAlign: "center"}}>Profile Page</Box>} />
         </Routes>
         <BottomNav value={tab} onChange={handleTabChange} />
       </Paper>
