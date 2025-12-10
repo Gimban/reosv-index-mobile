@@ -10,12 +10,13 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import ArticleIcon from "@mui/icons-material/Article";
+import HardwareIcon from '@mui/icons-material/Hardware';
 import * as styles from "./SideDrawer.styles";
 
 const menuItems = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
   { text: "Sheet Data", icon: <ArticleIcon />, path: "/sheet" },
-  { text: "Weapons", icon: <ArticleIcon />, path: "/weapons" },
+  { text: "Weapons", icon: <HardwareIcon />, path: "/weapons" },
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {
