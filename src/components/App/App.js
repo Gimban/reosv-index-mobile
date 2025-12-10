@@ -3,17 +3,18 @@ import { Box, Paper } from "@mui/material";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import Header from "../Header";
 import MainContent from "../MainContent";
-import BottomNav from "../BottomNav";
+// import BottomNav from "../BottomNav";
 import SheetData from "../SheetData";
 import SideDrawer from "../SideDrawer"; // SideDrawer import
 import * as styles from "./App.styles";
 
 export default function App() {
-  const [tab, setTab] = useState(0);
+  // const [tab, setTab] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Drawer 상태 추가
   const location = useLocation();
   const navigate = useNavigate();
 
+  /*
   useEffect(() => {
     switch (location.pathname) {
       case "/":
@@ -46,10 +47,12 @@ export default function App() {
         break;
     }
   };
+  */
 
   const handleDrawerOpen = () => {
     setIsDrawerOpen(true);
   };
+
 
   const handleDrawerClose = () => {
     setIsDrawerOpen(false);
@@ -76,7 +79,7 @@ export default function App() {
           <Route path="/search" element={<Box sx={{p: 2, textAlign: "center"}}>Search Page</Box>} />
           <Route path="/profile" element={<Box sx={{p: 2, textAlign: "center"}}>Profile Page</Box>} />
         </Routes>
-        <BottomNav value={tab} onChange={handleTabChange} />
+        {/* <BottomNav value={tab} onChange={handleTabChange} /> */}
       </Paper>
     </Box>
   );

@@ -9,16 +9,13 @@ import {
   Toolbar,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import SearchIcon from "@mui/icons-material/Search";
-import PersonIcon from "@mui/icons-material/Person";
 import ArticleIcon from "@mui/icons-material/Article";
 import * as styles from "./SideDrawer.styles";
 
 const menuItems = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
   { text: "Sheet Data", icon: <ArticleIcon />, path: "/sheet" },
-  { text: "Search", icon: <SearchIcon />, path: "/search" },
-  { text: "Profile", icon: <PersonIcon />, path: "/profile" },
+  { text: "Weapons", icon: <ArticleIcon />, path: "/weapons" },
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {
