@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Papa from "papaparse";
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
+import { CacheContext } from "../../contexts/CacheContext"; // CacheContext import
 import * as styles from "./Weapons.styles";
 
 // 본인의 구글 시트 ID로 교체하세요. GID는 0을 사용합니다.
@@ -32,12 +33,20 @@ const weaponImages = images.keys().reduce((acc, item) => {
 }, {});
 
 export default function Weapons() {
+  const { cache, setCacheValue } = useContext(CacheContext);
   const [weapons, setWeapons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      // 캐시에 'weapons' 데이터가 있는지 확인
+      if (cache.weapons) {
+        setWeapons(cache.weapons);
+        setLoading(false);
+        return; // 데이터가 있으면 fetch를 실행하지 않고 종료
+      }
+
       setLoading(true);
       setError(null);
       try {
@@ -61,6 +70,7 @@ export default function Weapons() {
               return false;
             });
             setWeapons(uniqueWeapons);
+            setCacheValue("weapons", uniqueWeapons); // 가져온 데이터를 캐시에 저장
             setLoading(false);
           },
           error: (err) => {
@@ -74,7 +84,7 @@ export default function Weapons() {
     };
 
     fetchData();
-  }, []);
+  }, [cache.weapons, setCacheValue]);
 
   const getWeaponNameStyle = (name) => {
     // 이름 길이에 따라 폰트 크기를 동적으로 조절합니다.

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Paper } from "@mui/material";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { CacheProvider } from "../../contexts/CacheContext";
 import Header from "../Header";
 import MainContent from "../MainContent";
 // import BottomNav from "../BottomNav";
@@ -74,13 +75,15 @@ export default function App() {
       <Paper elevation={0} square sx={styles.frame}>
         <Header onMenuClick={handleDrawerOpen} />
         {/* 라우트 설정 */}
-        <Routes>
-          <Route path="/" element={<MainContent />} />
-          <Route path="sheet" element={<SheetData />} />
-          <Route path="weapons" element={<Weapons />} />
-          <Route path="/search" element={<Box sx={{p: 2, textAlign: "center"}}>Search Page</Box>} />
-          <Route path="/profile" element={<Box sx={{p: 2, textAlign: "center"}}>Profile Page</Box>} />
-        </Routes>
+        <CacheProvider>
+          <Routes>
+            <Route path="/" element={<MainContent />} />
+            <Route path="sheet" element={<SheetData />} />
+            <Route path="weapons" element={<Weapons />} />
+            <Route path="/search" element={<Box sx={{p: 2, textAlign: "center"}}>Search Page</Box>} />
+            <Route path="/profile" element={<Box sx={{p: 2, textAlign: "center"}}>Profile Page</Box>} />
+          </Routes>
+        </CacheProvider>
         {/* <BottomNav value={tab} onChange={handleTabChange} /> */}
       </Paper>
     </Box>
