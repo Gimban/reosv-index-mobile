@@ -112,7 +112,7 @@ export default function Weapons() {
             <CardMedia
               component="img"
               sx={styles.cardImage}
-              image={weaponImages[weapon["이미지 파일"]]}
+              image={weaponImages[`${weapon["이미지 파일"]}.webp`]}
               alt={weapon["이름"]}
             />
             <CardContent sx={styles.cardContent}>
