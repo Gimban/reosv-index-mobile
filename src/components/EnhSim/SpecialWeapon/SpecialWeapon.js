@@ -18,13 +18,19 @@ import {
   CardMedia,
   CardContent,
 } from "@mui/material";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import { CacheContext } from "../../../contexts/CacheContext";
 import * as styles from "./SpecialWeapon.styles";
 
 // Weapons.js와 동일한 Google Sheet 정보를 사용합니다.
 const BASE_URL_ID = "1IZra9ZZRwBBgT4ai1W0fCATeFFsztHnF0k03DmLr1tI";
-const GID = "0";
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID}`;
+const WEAPONS_GID = "0";
+const GUARANTEED_ENH_GID = "2088796296"; // 확정 강화 비용 시트 GID
+const PROB_ENH_GID = "665507476"; // 확률 강화 비용 시트 GID
+
+const WEAPONS_SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${WEAPONS_GID}`;
+const GUARANTEED_ENH_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GUARANTEED_ENH_GID}`;
+const PROB_ENH_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${PROB_ENH_GID}`;
 
 // 무기 이미지 로드
 const images = require.context(
@@ -42,51 +48,63 @@ const weaponImages = images.keys().reduce((acc, item) => {
 export default function SpecialWeapon() {
   const { cache, setCacheValue } = useContext(CacheContext);
   const [weapons, setWeapons] = useState([]);
+  const [guaranteedEnhCosts, setGuaranteedEnhCosts] = useState([]);
+  const [probEnhCosts, setProbEnhCosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedWeaponName, setSelectedWeaponName] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentLevel, setCurrentLevel] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (cache.weapons) {
-        setWeapons(cache.weapons);
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
       setError(null);
-      try {
-        const response = await fetch(SHEET_URL);
+
+      const fetchAndParse = async (url, cacheKey) => {
+        if (cache[cacheKey]) {
+          return cache[cacheKey];
+        }
+        const response = await fetch(url);
         if (!response.ok) {
-          throw new Error("데이터를 가져오는 데 실패했습니다.");
+          throw new Error(`'${cacheKey}' 데이터를 가져오는 데 실패했습니다.`);
         }
         const csvText = await response.text();
-
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            const allWeaponsData = results.data.filter(
-              (row) => row["이름"] && row["이름"].trim() !== ""
-            );
-            setWeapons(allWeaponsData);
-            setCacheValue("weapons", allWeaponsData);
-            setLoading(false);
-          },
-          error: (err) => {
-            throw new Error(err.message);
-          },
+        return new Promise((resolve, reject) => {
+          Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+              const data = results.data.filter((row) =>
+                Object.values(row).some((val) => val && val.trim() !== "")
+              );
+              setCacheValue(cacheKey, data);
+              resolve(data);
+            },
+            error: (err) => reject(new Error(err.message)),
+          });
         });
+      };
+
+      try {
+        const [weaponsData, guaranteedData, probData] = await Promise.all([
+          fetchAndParse(WEAPONS_SHEET_URL, "weapons"),
+          fetchAndParse(GUARANTEED_ENH_URL, "guaranteedEnhCosts"),
+          fetchAndParse(PROB_ENH_URL, "probEnhCosts"),
+        ]);
+
+        setWeapons(weaponsData);
+        setGuaranteedEnhCosts(guaranteedData);
+        setProbEnhCosts(probData);
       } catch (e) {
         setError(e.message);
+      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [cache.weapons, setCacheValue]);
+  }, [cache, setCacheValue]);
 
   const getBaseWeaponData = useCallback(
     (name) => {
@@ -155,6 +173,7 @@ export default function SpecialWeapon() {
 
   const handleWeaponSelect = (name) => {
     setSelectedWeaponName(name);
+    setCurrentLevel(0); // 무기 선택 시 강화 레벨 초기화
     handleCloseModal();
   };
 
@@ -213,6 +232,31 @@ export default function SpecialWeapon() {
             <Typography variant="caption" color="text.secondary">
               등급: {selectedWeaponData["등급"]}
             </Typography>
+            <Typography variant="h6" sx={{ mt: 1 }}>
+              +{currentLevel} 강화
+            </Typography>
+          </Box>
+        </Paper>
+      )}
+
+      {selectedWeaponData && (
+        <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+            {/* 확정 강화 */}
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="subtitle1" gutterBottom>
+                확정 강화
+              </Typography>
+              {/* TODO: 확정 강화 비용 및 로직 구현 */}
+            </Box>
+
+            {/* 확률 강화 */}
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="subtitle1" gutterBottom>
+                확률 강화
+              </Typography>
+              {/* TODO: 확률 강화 비용 및 로직 구현 */}
+            </Box>
           </Box>
         </Paper>
       )}
