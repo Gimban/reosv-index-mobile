@@ -21,6 +21,7 @@ const menuItems = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
   { text: "Sheet Data", icon: <ArticleIcon />, path: "/sheet" },
   { text: "Weapons", icon: <HardwareIcon />, path: "/weapons" },
+  { text: "Class", icon: <ArticleIcon />, path: "/class" },
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {
