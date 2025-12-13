@@ -10,6 +10,7 @@ import SheetData from "../SheetData";
 import Weapons from "../Weapons";
 import WeaponDetail from "../WeaponDetail";
 import Class from "../Class";
+import ClassDetail from "../ClassDetail";
 import SideDrawer from "../SideDrawer"; // SideDrawer import
 import * as styles from "./App.styles";
 
@@ -85,6 +86,7 @@ export default function App() {
               <Route path="weapons" element={<Weapons />} />
               <Route path="class" element={<Class />} />
               <Route path="weapons/:weaponName" element={<WeaponDetail />} />
+              <Route path="classes/:className" element={<ClassDetail />} />
               <Route
                 path="/search"
                 element={
