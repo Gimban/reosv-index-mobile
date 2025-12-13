@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Box, Paper } from "@mui/material";
-import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { CacheProvider } from "../../contexts/CacheContext";
 import { ThemeContextProvider } from "../../contexts/ThemeContext";
 import Header from "../Header";
@@ -11,13 +11,14 @@ import Weapons from "../Weapons";
 import WeaponDetail from "../WeaponDetail";
 import Class from "../Class";
 import ClassDetail from "../ClassDetail";
+import EnhSim from "../EnhSim";
 import SideDrawer from "../SideDrawer"; // SideDrawer import
 import * as styles from "./App.styles";
 
 export default function App() {
   // const [tab, setTab] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false); // Drawer 상태 추가
-  const location = useLocation();
+  // const location = useLocation();
   const navigate = useNavigate();
 
   /*
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="class" element={<Class />} />
               <Route path="weapons/:weaponName" element={<WeaponDetail />} />
               <Route path="classes/:className" element={<ClassDetail />} />
+              <Route path="/enh_sim" element={<EnhSim />} />
               <Route
                 path="/search"
                 element={
