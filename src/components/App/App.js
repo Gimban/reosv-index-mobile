@@ -7,6 +7,7 @@ import MainContent from "../MainContent";
 // import BottomNav from "../BottomNav";
 import SheetData from "../SheetData";
 import Weapons from "../Weapons";
+import WeaponDetail from "../WeaponDetail";
 import SideDrawer from "../SideDrawer"; // SideDrawer import
 import * as styles from "./App.styles";
 
@@ -80,6 +81,7 @@ export default function App() {
             <Route path="/" element={<MainContent />} />
             <Route path="sheet" element={<SheetData />} />
             <Route path="weapons" element={<Weapons />} />
+            <Route path="weapons/:weaponName" element={<WeaponDetail />} />
             <Route path="/search" element={<Box sx={{p: 2, textAlign: "center"}}>Search Page</Box>} />
             <Route path="/profile" element={<Box sx={{p: 2, textAlign: "center"}}>Profile Page</Box>} />
           </Routes>

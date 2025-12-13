@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import Papa from "papaparse";
+import { Link } from "react-router-dom";
 import {
   Box,
   Card,
@@ -42,7 +43,18 @@ export default function Weapons() {
     const fetchData = async () => {
       // 캐시에 'weapons' 데이터가 있는지 확인
       if (cache.weapons) {
-        setWeapons(cache.weapons);
+        // 캐시된 데이터(모든 행 포함)에서 중복을 제거하여 목록에 표시합니다.
+        const seen = new Set();
+        const uniqueWeaponsForDisplay = cache.weapons.filter((row) => {
+          const name = row["이름"];
+          if (name && !seen.has(name)) {
+            seen.add(name);
+            return true;
+          }
+          return false;
+        });
+
+        setWeapons(uniqueWeaponsForDisplay);
         setLoading(false);
         return; // 데이터가 있으면 fetch를 실행하지 않고 종료
       }
@@ -60,17 +72,21 @@ export default function Weapons() {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
+            const allWeaponsData = results.data.filter(
+              (row) => row["이름"] && row["이름"].trim() !== ""
+            );
+
             const seen = new Set();
-            const uniqueWeapons = results.data.filter((row) => {
+            const uniqueWeaponsForDisplay = allWeaponsData.filter((row) => {
               const name = row["이름"];
-              if (name && name.trim() !== "" && !seen.has(name)) {
+              if (!seen.has(name)) {
                 seen.add(name);
                 return true;
               }
               return false;
             });
-            setWeapons(uniqueWeapons);
-            setCacheValue("weapons", uniqueWeapons); // 가져온 데이터를 캐시에 저장
+            setWeapons(uniqueWeaponsForDisplay);
+            setCacheValue("weapons", allWeaponsData); // 모든 행 데이터를 캐시에 저장
             setLoading(false);
           },
           error: (err) => {
@@ -118,22 +134,28 @@ export default function Weapons() {
       </Typography>
       <Box sx={styles.gridContainer}>
         {weapons.map((weapon, index) => (
-          <Card sx={styles.card(weapon["등급"])} key={index}>
-            <CardMedia
-              component="img"
-              sx={styles.cardImage}
-              image={weaponImages[`${weapon["이미지 파일"]}.webp`]}
-              alt={weapon["이름"]}
-            />
-            <CardContent sx={styles.cardContent}>
-              <Typography
-                variant="subtitle1"
-                sx={getWeaponNameStyle(weapon["이름"])}
-              >
-                {weapon["이름"]}
-              </Typography>
-            </CardContent>
-          </Card>
+          <Link
+            to={`/weapons/${weapon["이름"].replace(/ /g, "_")}`}
+            key={index}
+            style={{ textDecoration: "none" }}
+          >
+            <Card sx={styles.card(weapon["등급"])}>
+              <CardMedia
+                component="img"
+                sx={styles.cardImage}
+                image={weaponImages[`${weapon["이미지 파일"]}.webp`]}
+                alt={weapon["이름"]}
+              />
+              <CardContent sx={styles.cardContent}>
+                <Typography
+                  variant="subtitle1"
+                  sx={getWeaponNameStyle(weapon["이름"])}
+                >
+                  {weapon["이름"]}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </Box>
     </Container>
