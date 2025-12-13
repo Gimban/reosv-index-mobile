@@ -128,7 +128,7 @@ export default function Weapons() {
   }
 
   return (
-    <Container css={styles.container}>
+    <Container sx={styles.container}>
       <Typography variant="h5" gutterBottom>
         특수 무기 목록
       </Typography>

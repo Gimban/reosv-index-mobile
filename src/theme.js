@@ -35,10 +35,10 @@ const theme = createTheme({
     MuiAppBar: {
       defaultProps: { color: "inherit", elevation: 0 },
       styleOverrides: {
-        root: {
-          borderBottom: "1px solid rgba(0,0,0,0.06)",
-          backgroundColor: "#fff",
-        },
+        root: ({ theme }) => ({
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.paper,
+        }),
       },
     },
     MuiPaper: { styleOverrides: { root: { boxShadow: "0 4px 20px rgba(0,0,0,0.06)" } } },
