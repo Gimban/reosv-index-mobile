@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   Drawer,
   List,
@@ -7,11 +7,15 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import ArticleIcon from "@mui/icons-material/Article";
-import HardwareIcon from '@mui/icons-material/Hardware';
+import HardwareIcon from "@mui/icons-material/Hardware";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 import * as styles from "./SideDrawer.styles";
+import { ThemeContext } from "../../contexts/ThemeContext";
 
 const menuItems = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
@@ -20,6 +24,7 @@ const menuItems = [
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {
+  const { mode, toggleTheme } = useContext(ThemeContext);
   return (
     <Drawer
       anchor="left"
@@ -38,6 +43,19 @@ export default function SideDrawer({ open, onClose, onMenuItemClick }) {
             </ListItemButton>
           </ListItem>
         ))}
+      </List>
+      <Divider />
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={toggleTheme}>
+            <ListItemIcon>
+              {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+            </ListItemIcon>
+            <ListItemText
+              primary={mode === "dark" ? "Light 테마" : "Dark 테마"}
+            />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Drawer>
   );

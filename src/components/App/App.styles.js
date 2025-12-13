@@ -1,6 +1,6 @@
 export const root = {
   minHeight: "100dvh",
-  bgcolor: { xs: "background.default", md: "#f5f7fb" },
+  bgcolor: { xs: "background.default", md: "background.default" },
   display: "grid",
   placeItems: "center",
   paddingBottom: "env(safe-area-inset-bottom)",
@@ -15,5 +15,5 @@ export const frame = {
   flexDirection: "column",
   border: { md: "1px solid rgba(0,0,0,0.08)" },
   boxShadow: { md: "0 10px 40px rgba(0,0,0,0.08)" },
-  background: "#fff",
+  bgcolor: "background.paper",
 };

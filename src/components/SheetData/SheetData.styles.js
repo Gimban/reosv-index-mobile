@@ -14,7 +14,7 @@ export const table = {
   minWidth: 650,
 };
 
-export const tableHeaderCell = {
+export const tableHeaderCell = (theme) => ({
   fontWeight: "bold",
-  backgroundColor: "grey.200",
-};
+  backgroundColor: theme.palette.divider,
+});

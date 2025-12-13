@@ -1,7 +1,7 @@
-export const wrapper = {
+export const wrapper = (theme) => ({
   flexShrink: 0,
-  borderTop: "1px solid rgba(0,0,0,0.06)",
+  borderTop: `1px solid ${theme.palette.divider}`,
   position: "sticky",
   bottom: 0,
-  zIndex: (theme) => theme.zIndex.appBar,
-};
+  zIndex: theme.zIndex.appBar,
+});

@@ -1,48 +1,4 @@
-import { css } from "@emotion/react";
-
-export const container = css`
-  padding: 16px;
-`;
-
-export const gridContainer = css`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-`;
-
-export const card = (grade) => css`
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  text-align: center;
-  background-color: ${getCardColorByGrade(grade)};
-  color: white;
-  height: 190px;
-  display: flex;
-  flex-direction: column;
-`;
-
-export const cardImage = css`
-  width: 100%;
-  height: 120px;
-  object-fit: contain;
-  background-color: rgba(0, 0, 0, 0.1);
-`;
-
-export const cardContent = css`
-  padding: 8px;
-  flex-grow: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const weaponName = css`
-  font-weight: bold;
-`;
-
 // 무기 등급에 따른 카드 배경색을 반환합니다.
-// 시트의 "등급" 값에 따라 색상을 조정해야 할 수 있습니다.
 const getCardColorByGrade = (grade) => {
   switch (grade) {
     case "필멸":
@@ -65,4 +21,45 @@ const getCardColorByGrade = (grade) => {
     default:
       return "#616161"; // 회색 계열
   }
+};
+
+export const container = {
+  padding: 2,
+};
+
+export const gridContainer = {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, 1fr)",
+  gap: 2,
+};
+
+export const card = (grade) => (theme) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: "8px",
+  overflow: "hidden",
+  textAlign: "center",
+  backgroundColor: getCardColorByGrade(grade),
+  color: "white",
+  height: "190px",
+  display: "flex",
+  flexDirection: "column",
+});
+
+export const cardImage = {
+  width: "100%",
+  height: "120px",
+  objectFit: "contain",
+  backgroundColor: "rgba(0, 0, 0, 0.1)",
+};
+
+export const cardContent = {
+  padding: 1,
+  flexGrow: 1,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+export const weaponName = {
+  fontWeight: "bold",
 };
