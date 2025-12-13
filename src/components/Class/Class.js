@@ -1,10 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import {
-  Box,
-  CircularProgress,
-  Container,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Container, Typography } from "@mui/material";
 import * as styles from "./Class.styles";
 
 export default function Class() {
@@ -12,15 +7,17 @@ export default function Class() {
   const [error, setError] = useState(null);
 
   // TODO: Implement data fetching from the correct sheet
-  // const BASE_URL_ID = "YOUR_SHEET_ID";
-  // const GID = "YOUR_GID";
-  // const SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID}`;
+  const BASE_URL_ID = "1IZra9ZZRwBBgT4ai1W0fCATeFFsztHnF0k03DmLr1tI";
+  const GID = "1281476028";
+  const SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID}`;
 
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
         <CircularProgress />
-        <Typography sx={{ ml: 2 }}>클래스 목록을 불러오는 중입니다...</Typography>
+        <Typography sx={{ ml: 2 }}>
+          클래스 목록을 불러오는 중입니다...
+        </Typography>
       </Box>
     );
   }
