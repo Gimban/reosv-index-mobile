@@ -220,16 +220,26 @@ const CalculatedStats = ({ weapon, prevWeapon }) => {
   if (totalDamage > 0 && cooldownNum !== null && cooldownNum > 0) {
     const dps = totalDamage / cooldownNum;
     let dpsStr = dps.toFixed(2);
+    let prevDps = null;
 
     if (
       prevTotalDamage > 0 &&
       prevCooldownNum !== null &&
       prevCooldownNum > 0
     ) {
-      const prevDps = prevTotalDamage / prevCooldownNum;
+      prevDps = prevTotalDamage / prevCooldownNum;
       dpsStr += getDiffString(dps, prevDps);
     }
     calculated.push({ name: "초당 피해량 (DPS)", value: dpsStr });
+
+    // 분당 피해량 (DPM) 추가
+    const dpm = dps * 60;
+    let dpmStr = dpm.toFixed(2);
+    if (prevDps !== null) {
+      const prevDpm = prevDps * 60;
+      dpmStr += getDiffString(dpm, prevDpm);
+    }
+    calculated.push({ name: "분당 피해량 (DPM)", value: dpmStr });
   }
 
   // 2. 마나 효율
