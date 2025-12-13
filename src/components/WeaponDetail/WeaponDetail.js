@@ -30,7 +30,7 @@ const weaponImages = images.keys().reduce((acc, item) => {
   return acc;
 }, {});
 
-const ReinforcementInfo = ({ weapon, level }) => {
+const ReinforcementInfo = ({ weapon, prevWeapon, level }) => {
   if (!weapon || level === null) return null;
 
   // 표시하지 않을 기본 정보 컬럼들
@@ -43,16 +43,109 @@ const ReinforcementInfo = ({ weapon, level }) => {
     "",
     "설명",
     "비고",
+    "피해량",
+    "타수",
   ]);
 
-  const stats = Object.entries(weapon)
+  // 숫자와 단위를 분리하는 함수 (예: "10s" -> [10, "s"])
+  const parseValue = (str) => {
+    if (!str) return [null, null];
+    const num = parseFloat(str);
+    const unit = str.replace(String(num), "").trim();
+    return [isNaN(num) ? null : num, unit];
+  };
+
+  let stats = Object.entries(weapon)
     .filter(
       ([key, value]) => !excludedKeys.has(key) && value && value.trim() !== ""
     )
-    .map(([key, value]) => ({
-      name: key,
-      value: value,
-    }));
+    .filter(([key, value]) => {
+      // 마나가 0이면 표시하지 않음
+      if (key === "마나") {
+        return parseFloat(value) !== 0;
+      }
+      return true;
+    })
+    .map(([key, value]) => {
+      let displayValue = value;
+      // 피해량, 쿨타임, 마나에 대한 변화량 표시
+      if (prevWeapon && ["쿨타임", "마나"].includes(key)) {
+        const [currentNum, currentUnit] = parseValue(value);
+        const [prevNum, prevUnit] = parseValue(prevWeapon[key]);
+
+        if (
+          currentNum !== null &&
+          prevNum !== null &&
+          currentUnit === prevUnit
+        ) {
+          const diff = currentNum - prevNum;
+          if (diff !== 0) {
+            const sign = diff > 0 ? "+" : "";
+            // toFixed(2)로 소수점 2자리까지, .replace(/\.?0+$/, "")로 불필요한 0 제거
+            const diffStr = parseFloat(diff.toFixed(2)).toString();
+            displayValue = `${value} (${sign}${diffStr}${currentUnit})`;
+          }
+        }
+      }
+      return { name: key, value: displayValue };
+    });
+
+  // 피해량 x 타수 조합
+  const damage = weapon["피해량"];
+  const hits = weapon["타수"];
+
+  if (damage && hits) {
+    const [damageNum] = parseValue(damage);
+    const [hitsNum] = parseValue(hits);
+
+    if (damageNum !== null && hitsNum !== null && damageNum > 0) {
+      let damageStr = damage;
+      let hitsStr = "";
+      let totalDamageStr = "";
+      let totalDamageDiffStr = "";
+
+      // 이전 단계와 비교하여 변화량 계산
+      if (prevWeapon && prevWeapon["피해량"] && prevWeapon["타수"]) {
+        const [prevDamageNum] = parseValue(prevWeapon["피해량"]);
+        const [prevHitsNum] = parseValue(prevWeapon["타수"]);
+
+        if (prevDamageNum !== null && prevHitsNum !== null) {
+          // 1. 피해량 변화량
+          const damageDiff = damageNum - prevDamageNum;
+          if (damageDiff !== 0) {
+            const sign = damageDiff > 0 ? "+" : "";
+            const diffStr = parseFloat(damageDiff.toFixed(2)).toString();
+            damageStr += ` (${sign}${diffStr})`;
+          }
+
+          // 2. 총 피해량 변화량
+          const totalDamage = damageNum * hitsNum;
+          const prevTotalDamage = prevDamageNum * prevHitsNum;
+          const totalDamageDiff = totalDamage - prevTotalDamage;
+
+          if (totalDamageDiff !== 0) {
+            const sign = totalDamageDiff > 0 ? "+" : "";
+            const diffStr = parseFloat(totalDamageDiff.toFixed(2)).toString();
+            totalDamageDiffStr = ` (${sign}${diffStr})`;
+          }
+        }
+      }
+
+      // 타수가 1보다 크면 표시
+      if (hitsNum > 1) {
+        hitsStr = ` x ${hits}`;
+      }
+
+      // 타수가 1보다 클 때만 총 피해량을 별도 괄호로 표시
+      if (hitsNum > 1) {
+        const totalDamage = damageNum * hitsNum;
+        totalDamageStr = ` (${totalDamage})`;
+      }
+
+      const finalDamageValue = `${damageStr}${hitsStr}${totalDamageStr}${totalDamageDiffStr}`;
+      stats.unshift({ name: "피해량", value: finalDamageValue });
+    }
+  }
 
   if (stats.length === 0) {
     if (level > 0) {
@@ -83,6 +176,123 @@ const ReinforcementInfo = ({ weapon, level }) => {
   );
 };
 
+const CalculatedStats = ({ weapon, prevWeapon }) => {
+  if (!weapon) return null;
+
+  const parseValue = (str) => {
+    if (!str) return [null, null];
+    const num = parseFloat(str);
+    return [isNaN(num) ? null : num, ""];
+  };
+
+  const [damageNum] = parseValue(weapon["피해량"]);
+  const [hitsNum] = parseValue(weapon["타수"]);
+  const [cooldownNum] = parseValue(weapon["쿨타임"]);
+  const [manaNum] = parseValue(weapon["마나"]);
+
+  const calculated = [];
+
+  const totalDamage =
+    damageNum !== null && hitsNum !== null ? damageNum * hitsNum : 0;
+
+  // 이전 단계 값 파싱
+  const [prevDamageNum] = parseValue(prevWeapon?.["피해량"]);
+  const [prevHitsNum] = parseValue(prevWeapon?.["타수"]);
+  const [prevCooldownNum] = parseValue(prevWeapon?.["쿨타임"]);
+  const [prevManaNum] = parseValue(prevWeapon?.["마나"]);
+
+  const prevTotalDamage =
+    prevDamageNum !== null && prevHitsNum !== null
+      ? prevDamageNum * prevHitsNum
+      : 0;
+
+  const getDiffString = (current, prev) => {
+    if (prev === null || prev === undefined) return "";
+    const diff = current - prev;
+    if (diff !== 0 && !isNaN(diff)) {
+      const sign = diff > 0 ? "+" : "";
+      return ` (${sign}${diff.toFixed(2)})`;
+    }
+    return "";
+  };
+
+  // 1. 초당 피해량 (DPS)
+  if (totalDamage > 0 && cooldownNum !== null && cooldownNum > 0) {
+    const dps = totalDamage / cooldownNum;
+    let dpsStr = dps.toFixed(2);
+
+    if (
+      prevTotalDamage > 0 &&
+      prevCooldownNum !== null &&
+      prevCooldownNum > 0
+    ) {
+      const prevDps = prevTotalDamage / prevCooldownNum;
+      dpsStr += getDiffString(dps, prevDps);
+    }
+    calculated.push({ name: "초당 피해량 (DPS)", value: dpsStr });
+  }
+
+  // 2. 마나 효율
+  if (totalDamage > 0 && manaNum !== null && manaNum > 0) {
+    const manaEfficiency = totalDamage / manaNum;
+    let manaEfficiencyStr = manaEfficiency.toFixed(2);
+
+    if (prevTotalDamage > 0 && prevManaNum !== null && prevManaNum > 0) {
+      const prevManaEfficiency = prevTotalDamage / prevManaNum;
+      manaEfficiencyStr += getDiffString(manaEfficiency, prevManaEfficiency);
+    }
+    calculated.push({ name: "마나 효율", value: manaEfficiencyStr });
+  }
+
+  // 3. 초당 마나 소모량
+  if (
+    manaNum !== null &&
+    manaNum > 0 &&
+    cooldownNum !== null &&
+    cooldownNum > 0
+  ) {
+    const manaPerSecond = manaNum / cooldownNum;
+    let manaPerSecondStr = manaPerSecond.toFixed(2);
+
+    if (
+      prevManaNum !== null &&
+      prevManaNum > 0 &&
+      prevCooldownNum !== null &&
+      prevCooldownNum > 0
+    ) {
+      const prevManaPerSecond = prevManaNum / prevCooldownNum;
+      manaPerSecondStr += getDiffString(manaPerSecond, prevManaPerSecond);
+    }
+    calculated.push({
+      name: "초당 마나 소모량",
+      value: manaPerSecondStr,
+    });
+  }
+
+  if (calculated.length === 0) {
+    return null;
+  }
+
+  return (
+    <Paper sx={{ p: 2, mt: 2 }}>
+      <TableContainer>
+        <Table size="small">
+          <TableBody>
+            {calculated.map((data, index) => (
+              <TableRow key={index}>
+                <TableCell component="th" scope="row">
+                  {data.name}
+                </TableCell>
+                <TableCell align="right">{data.value}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
+  );
+};
+
 const WeaponDetail = () => {
   const { weaponName } = useParams();
   const { cache } = useContext(CacheContext);
@@ -102,6 +312,12 @@ const WeaponDetail = () => {
   const weapon =
     weaponLevels?.find((w) => parseInt(w["강화 차수"], 10) === level) ||
     weaponLevels?.[0];
+
+  // 이전 level에 해당하는 무기 데이터를 찾습니다.
+  const prevWeapon =
+    level > 0
+      ? weaponLevels?.find((w) => parseInt(w["강화 차수"], 10) === level - 1)
+      : null;
 
   useEffect(() => {
     // 컴포넌트가 처음 로드될 때만 초기 레벨을 설정합니다.
@@ -175,7 +391,13 @@ const WeaponDetail = () => {
         </Box>
       )}
 
-      <ReinforcementInfo weapon={weapon} level={level} />
+      <ReinforcementInfo
+        weapon={weapon}
+        prevWeapon={prevWeapon}
+        level={level}
+      />
+
+      <CalculatedStats weapon={weapon} prevWeapon={prevWeapon} />
 
       {(weapon["설명"] || weapon["비고"]) && (
         <Paper sx={{ p: 2, mt: 2 }}>
