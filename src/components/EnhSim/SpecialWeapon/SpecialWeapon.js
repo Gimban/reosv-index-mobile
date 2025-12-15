@@ -500,6 +500,12 @@ export default function SpecialWeapon() {
     handleSkipMenuClose();
   };
 
+  const handleResetCosts = () => {
+    setTotalCosts(initialTotalCosts);
+    setCurrentLevel(0);
+    setSnackbarInfo({ open: true, message: "누적 재화가 초기화되었습니다." });
+  };
+
   const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") return;
     setSnackbarInfo({ ...snackbarInfo, open: false });
@@ -793,10 +799,24 @@ export default function SpecialWeapon() {
           totalCosts.yellowPowder > 0 ||
           (totalCosts.consumedWeapons &&
             Object.keys(totalCosts.consumedWeapons).length > 0)) && (
-          <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              누적 소모 재화
-            </Typography>
+          <Paper elevation={3} sx={{ p: 2, mt: 2, position: "relative" }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Typography variant="h6">누적 소모 재화</Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleResetCosts}
+              >
+                초기화
+              </Button>
+            </Box>
             <Typography>골드: {totalCosts.gold.toLocaleString()}</Typography>
             <Typography>
               무형의 파편: {totalCosts.formlessShards.toLocaleString()}
