@@ -119,9 +119,9 @@ export default function ClassWeapon() {
     }
 
     if (
-      currentAdvTier > targetAdvTier ||
-      (currentAdvTier === targetAdvTier &&
-        currentEnhanceLevel >= targetEnhanceLevel)
+      parseInt(currentAdvTier, 10) > parseInt(targetAdvTier, 10) ||
+      (parseInt(currentAdvTier, 10) === parseInt(targetAdvTier, 10) &&
+        parseInt(currentEnhanceLevel, 10) >= parseInt(targetEnhanceLevel, 10))
     ) {
       return {
         totalCost: null,
