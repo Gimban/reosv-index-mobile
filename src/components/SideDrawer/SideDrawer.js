@@ -12,6 +12,7 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import ArticleIcon from "@mui/icons-material/Article";
 import HardwareIcon from "@mui/icons-material/Hardware";
+import CalculateIcon from "@mui/icons-material/Calculate";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import * as styles from "./SideDrawer.styles";
@@ -19,7 +20,8 @@ import { ThemeContext } from "../../contexts/ThemeContext";
 
 const menuItems = [
   { text: "Home", icon: <HomeIcon />, path: "/" },
-  { text: "Sheet Data", icon: <ArticleIcon />, path: "/sheet" },
+  // { text: "Sheet Data", icon: <ArticleIcon />, path: "/sheet" },
+  { text: "Enh_Sim", icon: <CalculateIcon />, path: "/enh_sim" },
   { text: "Weapons", icon: <HardwareIcon />, path: "/weapons" },
   { text: "Class", icon: <ArticleIcon />, path: "/class" },
 ];
