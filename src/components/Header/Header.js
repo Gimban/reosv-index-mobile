@@ -20,7 +20,7 @@ export default function Header({ onMenuClick }) {
           <MenuIcon />
         </IconButton>
         <Typography variant="h6" sx={styles.title}>
-          My Mobile App
+          Reo Index
         </Typography>
       </Toolbar>
     </AppBar>

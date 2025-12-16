@@ -212,9 +212,9 @@ export default function ClassWeapon() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Typography variant="h5" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         클래스 무기 강화 시뮬레이터
-      </Typography>
+      </Typography> */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="h6">현재 단계</Typography>
         {renderSelector(

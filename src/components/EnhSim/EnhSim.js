@@ -35,7 +35,7 @@ export default function EnhSim() {
       <Container>
         <Box sx={{ my: 2, textAlign: "center" }}>
           <Typography variant="h5" component="h1" gutterBottom>
-            강화 시뮬레이션
+            강화 시뮬레이터
           </Typography>
         </Box>
       </Container>
