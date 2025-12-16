@@ -8,7 +8,6 @@ import {
   CardMedia,
   CircularProgress,
   Container,
-  Grid,
   Typography,
 } from "@mui/material";
 import { CacheContext } from "../../contexts/CacheContext"; // CacheContext import
