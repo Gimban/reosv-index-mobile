@@ -1,6 +1,17 @@
 {
   "files": {
-    "main.js": "/reosv-index-mobile/static/js/main.c15985fd.js",
+    "main.js": "/reosv-index-mobile/static/js/main.ccae2997.js",
+    "static/js/330.190c8ec9.chunk.js": "/reosv-index-mobile/static/js/330.190c8ec9.chunk.js",
+    "static/js/274.4c2891df.chunk.js": "/reosv-index-mobile/static/js/274.4c2891df.chunk.js",
+    "static/js/366.4c8ee3d3.chunk.js": "/reosv-index-mobile/static/js/366.4c8ee3d3.chunk.js",
+    "static/js/60.a823b413.chunk.js": "/reosv-index-mobile/static/js/60.a823b413.chunk.js",
+    "static/js/105.23e43f77.chunk.js": "/reosv-index-mobile/static/js/105.23e43f77.chunk.js",
+    "static/js/701.15ff3149.chunk.js": "/reosv-index-mobile/static/js/701.15ff3149.chunk.js",
+    "static/js/74.21422efb.chunk.js": "/reosv-index-mobile/static/js/74.21422efb.chunk.js",
+    "static/js/168.3a61e6fe.chunk.js": "/reosv-index-mobile/static/js/168.3a61e6fe.chunk.js",
+    "static/js/642.c89d7c3a.chunk.js": "/reosv-index-mobile/static/js/642.c89d7c3a.chunk.js",
+    "static/js/97.dc72f8df.chunk.js": "/reosv-index-mobile/static/js/97.dc72f8df.chunk.js",
+    "static/js/371.c7950f5d.chunk.js": "/reosv-index-mobile/static/js/371.c7950f5d.chunk.js",
     "static/media/upgrade_olympus.webp": "/reosv-index-mobile/static/media/upgrade_olympus.36ac4419a60bd3dce7ec.webp",
     "static/media/upgrade_valhalla.webp": "/reosv-index-mobile/static/media/upgrade_valhalla.52eb91e35c701b959a39.webp",
     "static/media/awakened_olympus.webp": "/reosv-index-mobile/static/media/awakened_olympus.9c4d0ec116ca7586b6fc.webp",
@@ -109,9 +120,20 @@
     "static/media/blade1.webp": "/reosv-index-mobile/static/media/blade1.efdb486a95dea5a5d33a.webp",
     "static/media/mage1.webp": "/reosv-index-mobile/static/media/mage1.29ea54b0223298944196.webp",
     "index.html": "/reosv-index-mobile/index.html",
-    "main.c15985fd.js.map": "/reosv-index-mobile/static/js/main.c15985fd.js.map"
+    "main.ccae2997.js.map": "/reosv-index-mobile/static/js/main.ccae2997.js.map",
+    "330.190c8ec9.chunk.js.map": "/reosv-index-mobile/static/js/330.190c8ec9.chunk.js.map",
+    "274.4c2891df.chunk.js.map": "/reosv-index-mobile/static/js/274.4c2891df.chunk.js.map",
+    "366.4c8ee3d3.chunk.js.map": "/reosv-index-mobile/static/js/366.4c8ee3d3.chunk.js.map",
+    "60.a823b413.chunk.js.map": "/reosv-index-mobile/static/js/60.a823b413.chunk.js.map",
+    "105.23e43f77.chunk.js.map": "/reosv-index-mobile/static/js/105.23e43f77.chunk.js.map",
+    "701.15ff3149.chunk.js.map": "/reosv-index-mobile/static/js/701.15ff3149.chunk.js.map",
+    "74.21422efb.chunk.js.map": "/reosv-index-mobile/static/js/74.21422efb.chunk.js.map",
+    "168.3a61e6fe.chunk.js.map": "/reosv-index-mobile/static/js/168.3a61e6fe.chunk.js.map",
+    "642.c89d7c3a.chunk.js.map": "/reosv-index-mobile/static/js/642.c89d7c3a.chunk.js.map",
+    "97.dc72f8df.chunk.js.map": "/reosv-index-mobile/static/js/97.dc72f8df.chunk.js.map",
+    "371.c7950f5d.chunk.js.map": "/reosv-index-mobile/static/js/371.c7950f5d.chunk.js.map"
   },
   "entrypoints": [
-    "static/js/main.c15985fd.js"
+    "static/js/main.ccae2997.js"
   ]
 }
