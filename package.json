@@ -21,7 +21,7 @@
   },
   "homepage": "https://gimban.github.io/reosv-index-mobile",
   "scripts": {
-    "start": "cross-env PUBLIC_URL=/ react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
