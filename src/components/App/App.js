@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { Box, Paper } from "@mui/material";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { CacheProvider } from "../../contexts/CacheContext";
 import { ThemeContextProvider } from "../../contexts/ThemeContext";
 import Header from "../Header";
-import MainContent from "../MainContent";
 // import BottomNav from "../BottomNav";
-import SheetData from "../SheetData";
-import Weapons from "../Weapons";
-import WeaponDetail from "../WeaponDetail";
-import Class from "../Class";
-import ClassDetail from "../ClassDetail";
-import EnhSim from "../EnhSim";
 import SideDrawer from "../SideDrawer"; // SideDrawer import
 import * as styles from "./App.styles";
+
+const MainContent = lazy(() => import("../MainContent"));
+const SheetData = lazy(() => import("../SheetData"));
+const Weapons = lazy(() => import("../Weapons"));
+const WeaponDetail = lazy(() => import("../WeaponDetail"));
+const Class = lazy(() => import("../Class"));
+const ClassDetail = lazy(() => import("../ClassDetail"));
+const EnhSim = lazy(() => import("../EnhSim"));
 
 export default function App() {
   // const [tab, setTab] = useState(0);
@@ -81,27 +82,29 @@ export default function App() {
           <Paper elevation={0} square sx={styles.frame}>
             <Header onMenuClick={handleDrawerOpen} />
             {/* 라우트 설정 */}
-            <Routes>
-              <Route path="/" element={<MainContent />} />
-              <Route path="sheet" element={<SheetData />} />
-              <Route path="weapons" element={<Weapons />} />
-              <Route path="class" element={<Class />} />
-              <Route path="weapons/:weaponName" element={<WeaponDetail />} />
-              <Route path="classes/:className" element={<ClassDetail />} />
-              <Route path="/enh_sim" element={<EnhSim />} />
-              <Route
-                path="/search"
-                element={
-                  <Box sx={{ p: 2, textAlign: "center" }}>Search Page</Box>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <Box sx={{ p: 2, textAlign: "center" }}>Profile Page</Box>
-                }
-              />
-            </Routes>
+            <Suspense fallback={<div>Loading...</div>}>
+              <Routes>
+                <Route path="/" element={<MainContent />} />
+                <Route path="sheet" element={<SheetData />} />
+                <Route path="weapons" element={<Weapons />} />
+                <Route path="class" element={<Class />} />
+                <Route path="weapons/:weaponName" element={<WeaponDetail />} />
+                <Route path="classes/:className" element={<ClassDetail />} />
+                <Route path="/enh_sim" element={<EnhSim />} />
+                <Route
+                  path="/search"
+                  element={
+                    <Box sx={{ p: 2, textAlign: "center" }}>Search Page</Box>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <Box sx={{ p: 2, textAlign: "center" }}>Profile Page</Box>
+                  }
+                />
+              </Routes>
+            </Suspense>
             {/* <BottomNav value={tab} onChange={handleTabChange} /> */}
           </Paper>
         </Box>
