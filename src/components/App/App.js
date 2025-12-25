@@ -3,6 +3,7 @@ import { Box, Paper } from "@mui/material";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import { CacheProvider } from "../../contexts/CacheContext";
 import { ThemeContextProvider } from "../../contexts/ThemeContext";
+import { DpsCalcProvider } from "../../contexts/DpsCalcContext";
 import Header from "../Header";
 // import BottomNav from "../BottomNav";
 import SideDrawer from "../SideDrawer"; // SideDrawer import
@@ -15,6 +16,8 @@ const WeaponDetail = lazy(() => import("../WeaponDetail"));
 const Class = lazy(() => import("../Class"));
 const ClassDetail = lazy(() => import("../ClassDetail"));
 const EnhSim = lazy(() => import("../EnhSim"));
+const DpsCalc = lazy(() => import("../DpsCalc"));
+const Level = lazy(() => import("../DpsCalc/Level"));
 
 export default function App() {
   // const [tab, setTab] = useState(0);
@@ -73,41 +76,36 @@ export default function App() {
   return (
     <ThemeContextProvider>
       <CacheProvider>
-        <Box sx={styles.root}>
-          <SideDrawer
-            open={isDrawerOpen}
-            onClose={handleDrawerClose}
-            onMenuItemClick={handleMenuItemClick}
-          />
-          <Paper elevation={0} square sx={styles.frame}>
-            <Header onMenuClick={handleDrawerOpen} />
-            {/* 라우트 설정 */}
-            <Suspense fallback={<div>Loading...</div>}>
-              <Routes>
-                <Route path="/" element={<MainContent />} />
-                <Route path="sheet" element={<SheetData />} />
-                <Route path="weapons" element={<Weapons />} />
-                <Route path="class" element={<Class />} />
-                <Route path="weapons/:weaponName" element={<WeaponDetail />} />
-                <Route path="classes/:className" element={<ClassDetail />} />
-                <Route path="/enh_sim" element={<EnhSim />} />
-                <Route
-                  path="/search"
-                  element={
-                    <Box sx={{ p: 2, textAlign: "center" }}>Search Page</Box>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <Box sx={{ p: 2, textAlign: "center" }}>Profile Page</Box>
-                  }
-                />
-              </Routes>
-            </Suspense>
-            {/* <BottomNav value={tab} onChange={handleTabChange} /> */}
-          </Paper>
-        </Box>
+        <DpsCalcProvider>
+          <Box sx={styles.root}>
+            <SideDrawer
+              open={isDrawerOpen}
+              onClose={handleDrawerClose}
+              onMenuItemClick={handleMenuItemClick}
+            />
+            <Paper elevation={0} square sx={styles.frame}>
+              <Header onMenuClick={handleDrawerOpen} />
+              {/* 라우트 설정 */}
+              <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                  <Route path="/" element={<MainContent />} />
+                  <Route path="sheet" element={<SheetData />} />
+                  <Route path="weapons" element={<Weapons />} />
+                  <Route path="class" element={<Class />} />
+                  <Route
+                    path="weapons/:weaponName"
+                    element={<WeaponDetail />}
+                  />
+                  <Route path="classes/:className" element={<ClassDetail />} />
+                  <Route path="/enh_sim" element={<EnhSim />} />
+                  <Route path="/dps_calc" element={<DpsCalc />} />
+                  <Route path="/dps_calc/level" element={<Level />} />
+                </Routes>
+              </Suspense>
+              {/* <BottomNav value={tab} onChange={handleTabChange} /> */}
+            </Paper>
+          </Box>
+        </DpsCalcProvider>
       </CacheProvider>
     </ThemeContextProvider>
   );

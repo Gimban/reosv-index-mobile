@@ -15,6 +15,7 @@ import HardwareIcon from "@mui/icons-material/Hardware";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
+import SpeedIcon from "@mui/icons-material/Speed";
 import * as styles from "./SideDrawer.styles";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
@@ -24,6 +25,7 @@ const menuItems = [
   { text: "Enh_Sim", icon: <CalculateIcon />, path: "/enh_sim" },
   { text: "Weapons", icon: <HardwareIcon />, path: "/weapons" },
   { text: "Class", icon: <ArticleIcon />, path: "/class" },
+  { text: "DPS Calc", icon: <SpeedIcon />, path: "/dps_calc" },
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {
