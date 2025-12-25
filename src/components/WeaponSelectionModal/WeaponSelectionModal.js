@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   Modal,
   Box,
@@ -30,13 +30,16 @@ const WeaponSelectionModal = ({
   excludedNames = new Set(),
   excludedGrades = new Set(),
 }) => {
-  const getBaseWeaponData = (name) => {
-    return (
-      weaponsData.find(
-        (w) => w["이름"] === name && parseInt(w["강화 차수"], 10) === 0
-      ) || weaponsData.find((w) => w["이름"] === name)
-    );
-  };
+  const getBaseWeaponData = useCallback(
+    (name) => {
+      return (
+        weaponsData.find(
+          (w) => w["이름"] === name && parseInt(w["강화 차수"], 10) === 0
+        ) || weaponsData.find((w) => w["이름"] === name)
+      );
+    },
+    [weaponsData]
+  );
 
   const uniqueWeaponNames = useMemo(() => {
     if (!weaponsData) return [];
@@ -60,7 +63,7 @@ const WeaponSelectionModal = ({
       const weapon = getBaseWeaponData(name);
       return weapon && !excludedGrades.has(weapon["등급"]);
     });
-  }, [weaponsData, excludedNames, excludedGrades]);
+  }, [weaponsData, excludedNames, excludedGrades, getBaseWeaponData]);
 
   return (
     <Modal open={open} onClose={onClose}>
