@@ -48,6 +48,89 @@ const excludedGrades = new Set([]);
 let idCounter = 0;
 const MAX_ITEMS = 15;
 
+const SpecialWeaponItem = React.memo(
+  ({
+    item,
+    index,
+    onRemove,
+    onChange,
+    onOpenModal,
+    getEnhancementsForWeapon,
+    calculateStats,
+    isDuplicate,
+    isRemoveDisabled,
+  }) => {
+    const { dps, mps } = useMemo(
+      () => calculateStats(item.name, item.enh),
+      [item.name, item.enh, calculateStats]
+    );
+
+    const enhancements = useMemo(
+      () => getEnhancementsForWeapon(item.name),
+      [item.name, getEnhancementsForWeapon]
+    );
+
+    return (
+      <Grid item>
+        <Paper sx={styles.itemPaper} elevation={2}>
+          <Box sx={styles.itemHeader}>
+            <Typography variant="h6">무기 #{index + 1}</Typography>
+            <IconButton
+              onClick={() => onRemove(item.id)}
+              disabled={isRemoveDisabled}
+            >
+              <RemoveCircleOutlineIcon />
+            </IconButton>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexDirection: { xs: "column", sm: "row" },
+            }}
+          >
+            <FormControl sx={{ width: { xs: "100%", sm: "70%" } }}>
+              <Button
+                variant="outlined"
+                onClick={() => onOpenModal(item.id)}
+                sx={{ justifyContent: "flex-start", height: "56px" }}
+              >
+                {item.name || "무기 선택"}
+              </Button>
+            </FormControl>
+            <FormControl
+              sx={{ width: { xs: "100%", sm: "30%" } }}
+              disabled={!item.name}
+            >
+              <InputLabel>강화 차수</InputLabel>
+              <Select
+                value={item.name ? item.enh : ""}
+                label="강화 차수"
+                onChange={(e) => onChange(item.id, "enh", e.target.value)}
+              >
+                {enhancements.map((enhLevel) => (
+                  <MenuItem key={enhLevel} value={enhLevel}>
+                    +{enhLevel}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+          {isDuplicate && (
+            <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+              * 중복된 무기입니다. 강화 수치가 가장 높은 항목만 적용됩니다.
+            </Typography>
+          )}
+          <Box sx={styles.statsBox}>
+            <Typography>DPS: {dps.toFixed(2)}</Typography>
+            <Typography>초당 마나: {mps.toFixed(2)}</Typography>
+          </Box>
+        </Paper>
+      </Grid>
+    );
+  }
+);
+
 const SpecialWeapon = () => {
   const navigate = useNavigate();
   const { cache, setCacheValue } = useContext(CacheContext);
@@ -113,25 +196,46 @@ const SpecialWeapon = () => {
     updateDpsState("specialWeapons", items);
   }, [items, updateDpsState]);
 
-  const getEnhancementsForWeapon = (weaponName) => {
-    if (!allWeaponsData || !weaponName) return [];
-    return allWeaponsData
-      .filter((w) => w["이름"] === weaponName)
-      .map((w) => parseInt(w["강화 차수"], 10))
-      .sort((a, b) => a - b);
-  };
+  const processedWeaponData = useMemo(() => {
+    if (!allWeaponsData) return {};
+    const data = {};
+    allWeaponsData.forEach((w) => {
+      const name = w["이름"];
+      if (!name) return;
+      if (!data[name]) {
+        data[name] = {
+          enhancements: [],
+          byEnhancement: {},
+        };
+      }
+      const enh = parseInt(w["강화 차수"], 10);
+      data[name].enhancements.push(enh);
+      data[name].byEnhancement[enh] = w;
+    });
+
+    Object.values(data).forEach((entry) => {
+      entry.enhancements.sort((a, b) => a - b);
+    });
+
+    return data;
+  }, [allWeaponsData]);
+
+  const getEnhancementsForWeapon = useCallback(
+    (weaponName) => {
+      if (!processedWeaponData[weaponName]) return [];
+      return processedWeaponData[weaponName].enhancements;
+    },
+    [processedWeaponData]
+  );
 
   const calculateStats = useCallback(
     (weaponName, enhancement) => {
-      if (!allWeaponsData || !weaponName) {
+      const weaponData = processedWeaponData[weaponName];
+      if (!weaponData) {
         return { dps: 0, mps: 0 };
       }
 
-      const weapon = allWeaponsData.find(
-        (w) =>
-          w["이름"] === weaponName &&
-          parseInt(w["강화 차수"], 10) === enhancement
-      );
+      const weapon = weaponData.byEnhancement[enhancement];
 
       if (!weapon) {
         return { dps: 0, mps: 0 };
@@ -154,10 +258,10 @@ const SpecialWeapon = () => {
 
       return { dps, mps };
     },
-    [allWeaponsData]
+    [processedWeaponData]
   );
 
-  const handleItemChange = (id, field, value) => {
+  const handleItemChange = useCallback((id, field, value) => {
     setItems((prevItems) =>
       prevItems.map((item) => {
         if (item.id === id) {
@@ -170,58 +274,58 @@ const SpecialWeapon = () => {
         return item;
       })
     );
-  };
+  }, []);
 
-  const handleAddItem = () => {
-    if (items.length < MAX_ITEMS) {
-      setItems([...items, { id: idCounter++, name: "", enh: 0 }]);
-    }
-  };
+  const handleAddItem = useCallback(() => {
+    setItems((prevItems) => {
+      if (prevItems.length < MAX_ITEMS) {
+        return [...prevItems, { id: idCounter++, name: "", enh: 0 }];
+      }
+      return prevItems;
+    });
+  }, []);
 
-  const handleRemoveItem = (id) => {
-    setItems(items.filter((item) => item.id !== id));
-  };
+  const handleRemoveItem = useCallback((id) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  }, []);
 
-  const handleOpenModal = (itemId) => {
+  const handleOpenModal = useCallback((itemId) => {
     setActiveItemId(itemId);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setActiveItemId(null);
-  };
+  }, []);
 
-  const handleWeaponSelect = (weaponName) => {
-    if (activeItemId !== null) {
-      handleItemChange(activeItemId, "name", weaponName);
-    }
-    handleCloseModal();
-  };
+  const handleWeaponSelect = useCallback(
+    (weaponName) => {
+      if (activeItemId !== null) {
+        handleItemChange(activeItemId, "name", weaponName);
+      }
+      handleCloseModal();
+    },
+    [activeItemId, handleItemChange, handleCloseModal]
+  );
 
   const handleConfirm = () => {
     navigate("/dps_calc");
   };
 
-  const calculatedItems = useMemo(() => {
+  const nameCounts = useMemo(() => {
     const nameCounts = items.reduce((acc, item) => {
       if (item.name) {
         acc[item.name] = (acc[item.name] || 0) + 1;
       }
       return acc;
     }, {});
-
-    return items.map((item) => {
-      const { dps, mps } = calculateStats(item.name, item.enh);
-      const isDuplicate = item.name ? nameCounts[item.name] > 1 : false;
-      return { ...item, dps, mps, isDuplicate };
-    });
-  }, [items, calculateStats]);
+    return nameCounts;
+  }, [items]);
 
   const totalStats = useMemo(() => {
     const uniqueItems = {};
-
-    calculatedItems.forEach((item) => {
+    items.forEach((item) => {
       if (!item.name) return;
 
       if (!uniqueItems[item.name] || item.enh > uniqueItems[item.name].enh) {
@@ -233,13 +337,14 @@ const SpecialWeapon = () => {
 
     return finalItems.reduce(
       (acc, item) => {
-        acc.totalDps += item.dps;
-        acc.totalMps += item.mps;
+        const { dps, mps } = calculateStats(item.name, item.enh);
+        acc.totalDps += dps;
+        acc.totalMps += mps;
         return acc;
       },
       { totalDps: 0, totalMps: 0 }
     );
-  }, [calculatedItems]);
+  }, [items, calculateStats]);
 
   if (loading) {
     return (
@@ -265,65 +370,19 @@ const SpecialWeapon = () => {
       </Typography>
 
       <Grid container direction="column" spacing={2}>
-        {calculatedItems.map((item, index) => (
-          <Grid item key={item.id}>
-            <Paper sx={styles.itemPaper} elevation={2}>
-              <Box sx={styles.itemHeader}>
-                <Typography variant="h6">무기 #{index + 1}</Typography>
-                <IconButton
-                  onClick={() => handleRemoveItem(item.id)}
-                  disabled={items.length <= 1}
-                >
-                  <RemoveCircleOutlineIcon />
-                </IconButton>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  flexDirection: { xs: "column", sm: "row" },
-                }}
-              >
-                <FormControl sx={{ width: { xs: "100%", sm: "70%" } }}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => handleOpenModal(item.id)}
-                    sx={{ justifyContent: "flex-start", height: "56px" }}
-                  >
-                    {item.name || "무기 선택"}
-                  </Button>
-                </FormControl>
-                <FormControl
-                  sx={{ width: { xs: "100%", sm: "30%" } }}
-                  disabled={!item.name}
-                >
-                  <InputLabel>강화 차수</InputLabel>
-                  <Select
-                    value={item.name ? item.enh : ""}
-                    label="강화 차수"
-                    onChange={(e) =>
-                      handleItemChange(item.id, "enh", e.target.value)
-                    }
-                  >
-                    {getEnhancementsForWeapon(item.name).map((enhLevel) => (
-                      <MenuItem key={enhLevel} value={enhLevel}>
-                        +{enhLevel}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Box>
-              {item.isDuplicate && (
-                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
-                  * 중복된 무기입니다. 강화 수치가 가장 높은 항목만 적용됩니다.
-                </Typography>
-              )}
-              <Box sx={styles.statsBox}>
-                <Typography>DPS: {item.dps.toFixed(2)}</Typography>
-                <Typography>초당 마나: {item.mps.toFixed(2)}</Typography>
-              </Box>
-            </Paper>
-          </Grid>
+        {items.map((item, index) => (
+          <SpecialWeaponItem
+            key={item.id}
+            item={item}
+            index={index}
+            onRemove={handleRemoveItem}
+            onChange={handleItemChange}
+            onOpenModal={handleOpenModal}
+            getEnhancementsForWeapon={getEnhancementsForWeapon}
+            calculateStats={calculateStats}
+            isDuplicate={item.name ? nameCounts[item.name] > 1 : false}
+            isRemoveDisabled={items.length <= 1}
+          />
         ))}
       </Grid>
 
