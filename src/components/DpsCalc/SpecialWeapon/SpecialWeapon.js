@@ -23,11 +23,26 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { CacheContext } from "../../../contexts/CacheContext";
+import WeaponSelectionModal from "../../WeaponSelectionModal";
 import * as styles from "./SpecialWeapon.styles";
 
 const BASE_URL_ID = "1IZra9ZZRwBBgT4ai1W0fCATeFFsztHnF0k03DmLr1tI";
 const GID = "0";
 const SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID}`;
+
+// EnhSim에서 사용하는 제외 목록과 동일하게 설정
+const excludedNames = new Set([
+  "방랑자, 플레탄",
+  "서머 샤인",
+  "오터먼트",
+  "생명의 반지",
+  "플레임",
+  "실바니아",
+  "산타 스태프",
+  "섀도우 소드",
+  "섀도우 대거",
+]);
+const excludedGrades = new Set(["보스", "운명", "기타"]);
 
 let idCounter = 0;
 const MAX_ITEMS = 15;
@@ -39,6 +54,8 @@ const SpecialWeapon = () => {
   const [error, setError] = useState(null);
 
   const [items, setItems] = useState([{ id: idCounter++, name: "", enh: 0 }]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeItemId, setActiveItemId] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,21 +95,6 @@ const SpecialWeapon = () => {
 
     fetchData();
   }, [cache.weapons, setCacheValue]);
-
-  const uniqueWeapons = useMemo(() => {
-    if (!allWeaponsData) return [];
-    const seen = new Set();
-    return allWeaponsData
-      .map((w) => w["이름"])
-      .filter((name) => {
-        if (name && !seen.has(name)) {
-          seen.add(name);
-          return true;
-        }
-        return false;
-      })
-      .sort();
-  }, [allWeaponsData]);
 
   const getEnhancementsForWeapon = (weaponName) => {
     if (!allWeaponsData || !weaponName) return [];
@@ -165,6 +167,23 @@ const SpecialWeapon = () => {
     setItems(items.filter((item) => item.id !== id));
   };
 
+  const handleOpenModal = (itemId) => {
+    setActiveItemId(itemId);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setActiveItemId(null);
+  };
+
+  const handleWeaponSelect = (weaponName) => {
+    if (activeItemId !== null) {
+      handleItemChange(activeItemId, "name", weaponName);
+    }
+    handleCloseModal();
+  };
+
   const calculatedItems = useMemo(() => {
     return items.map((item) => {
       const { dps, mps } = calculateStats(item.name, item.enh);
@@ -219,44 +238,42 @@ const SpecialWeapon = () => {
                   <RemoveCircleOutlineIcon />
                 </IconButton>
               </Box>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel>무기 선택</InputLabel>
-                    <Select
-                      value={item.name}
-                      label="무기 선택"
-                      onChange={(e) =>
-                        handleItemChange(item.id, "name", e.target.value)
-                      }
-                    >
-                      {uniqueWeapons.map((weaponName) => (
-                        <MenuItem key={weaponName} value={weaponName}>
-                          {weaponName}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth disabled={!item.name}>
-                    <InputLabel>강화 차수</InputLabel>
-                    <Select
-                      value={item.enh}
-                      label="강화 차수"
-                      onChange={(e) =>
-                        handleItemChange(item.id, "enh", e.target.value)
-                      }
-                    >
-                      {getEnhancementsForWeapon(item.name).map((enhLevel) => (
-                        <MenuItem key={enhLevel} value={enhLevel}>
-                          +{enhLevel}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-              </Grid>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: { xs: "column", sm: "row" },
+                }}
+              >
+                <FormControl sx={{ width: { xs: "100%", sm: "70%" } }}>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleOpenModal(item.id)}
+                    sx={{ justifyContent: "flex-start", height: "56px" }}
+                  >
+                    {item.name || "무기 선택"}
+                  </Button>
+                </FormControl>
+                <FormControl
+                  sx={{ width: { xs: "100%", sm: "30%" } }}
+                  disabled={!item.name}
+                >
+                  <InputLabel>강화 차수</InputLabel>
+                  <Select
+                    value={item.name ? item.enh : ""}
+                    label="강화 차수"
+                    onChange={(e) =>
+                      handleItemChange(item.id, "enh", e.target.value)
+                    }
+                  >
+                    {getEnhancementsForWeapon(item.name).map((enhLevel) => (
+                      <MenuItem key={enhLevel} value={enhLevel}>
+                        +{enhLevel}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Box>
               <Box sx={styles.statsBox}>
                 <Typography>DPS: {item.dps.toFixed(2)}</Typography>
                 <Typography>초당 마나: {item.mps.toFixed(2)}</Typography>
@@ -288,6 +305,15 @@ const SpecialWeapon = () => {
       <Button variant="contained" color="primary" sx={{ mt: 2 }}>
         확인
       </Button>
+
+      <WeaponSelectionModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onWeaponSelect={handleWeaponSelect}
+        weaponsData={allWeaponsData}
+        excludedNames={excludedNames}
+        excludedGrades={excludedGrades}
+      />
     </Box>
   );
 };

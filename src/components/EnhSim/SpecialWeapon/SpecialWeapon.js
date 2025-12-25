@@ -12,11 +12,6 @@ import {
   CircularProgress,
   Paper,
   Button,
-  Modal,
-  Card,
-  CardActionArea,
-  CardMedia,
-  CardContent,
   Menu,
   MenuItem,
   Switch,
@@ -25,6 +20,7 @@ import {
 } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { CacheContext } from "../../../contexts/CacheContext";
+import WeaponSelectionModal from "../../WeaponSelectionModal";
 import * as styles from "./SpecialWeapon.styles";
 
 // Weapons.js와 동일한 Google Sheet 정보를 사용합니다.
@@ -52,9 +48,25 @@ const weaponImages = images.keys().reduce((acc, item) => {
 
 const SIM_STATE_CACHE_KEY = "specialWeaponEnhSimState";
 
+// 하드코딩으로 제외할 무기 이름 목록
+const excludedNames = new Set([
+  "방랑자, 플레탄",
+  "서머 샤인",
+  "오터먼트",
+  "생명의 반지",
+  "플레임",
+  "실바니아",
+  "산타 스태프",
+  "섀도우 소드",
+  "섀도우 대거",
+]);
+
+// 하드코딩으로 제외할 무기 등급 목록
+const excludedGrades = new Set(["보스", "운명", "기타"]);
+
 export default function SpecialWeapon() {
   const { cache, setCacheValue } = useContext(CacheContext);
-  const [weapons, setWeapons] = useState([]);
+  const { weapons: allWeaponsData } = cache;
   const [guaranteedEnhCosts, setGuaranteedEnhCosts] = useState([]);
   const [probEnhCosts, setProbEnhCosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,8 +89,6 @@ export default function SpecialWeapon() {
       const savedStateJSON = sessionStorage.getItem(SIM_STATE_CACHE_KEY);
       if (savedStateJSON) {
         const savedState = JSON.parse(savedStateJSON);
-        // uniqueWeaponNames가 아직 계산되지 않았으므로, 우선 저장된 이름을 반환합니다.
-        // 이후 useEffect에서 유효성을 검사하고 초기화할 수 있습니다.
         return savedState.selectedWeaponName || "";
       }
     } catch (error) {
@@ -134,42 +144,11 @@ export default function SpecialWeapon() {
     message: "",
   });
 
-  const getBaseWeaponData = useCallback(
-    (name) => {
-      return (
-        weapons.find(
-          (w) => w["이름"] === name && parseInt(w["강화 차수"], 10) === 0
-        ) || weapons.find((w) => w["이름"] === name)
-      );
-    },
-    [weapons]
-  );
+  // 데이터 로드 후, 저장된 무기 이름이 유효하지 않으면 초기화
+  useEffect(() => {
+    if (!allWeaponsData || !selectedWeaponName) return;
 
-  const uniqueWeaponNames = useMemo(() => {
-    // 하드코딩으로 제외할 무기 이름 목록
-    const excludedNames = new Set([
-      // 여기에 제외할 무기 이름을 추가하세요. 예: "제외할 무기"
-      "방랑자, 플레탄",
-      "서머 샤인",
-      "오터먼트",
-      "생명의 반지",
-      "플레임",
-      "실바니아",
-      "산타 스태프",
-      "섀도우 소드",
-      "섀도우 대거",
-    ]);
-
-    // 하드코딩으로 제외할 무기 등급 목록
-    const excludedGrades = new Set([
-      // 여기에 제외할 등급을 추가하세요. 예: "일반"
-      "보스",
-      "운명",
-      "기타",
-    ]);
-
-    // 각 무기 이름의 등장 횟수를 계산합니다.
-    const nameCounts = weapons.reduce((acc, w) => {
+    const nameCounts = allWeaponsData.reduce((acc, w) => {
       const name = w["이름"];
       if (name) {
         acc[name] = (acc[name] || 0) + 1;
@@ -177,32 +156,27 @@ export default function SpecialWeapon() {
       return acc;
     }, {});
 
-    // 모든 고유한 무기 이름 목록을 가져옵니다.
-    const allUniqueNames = Array.from(new Set(weapons.map((w) => w["이름"])));
+    const isEnhanceable = (name) => nameCounts[name] > 1;
 
-    // 필터링 적용:
-    // 1. 강화 단계가 2개 이상 (강화 가능)
-    // 2. 제외 이름 목록에 포함되지 않음
-    // 3. 제외 등급 목록에 포함되지 않음
-    return allUniqueNames.filter((name) => {
-      if (!name || nameCounts[name] <= 1 || excludedNames.has(name)) {
-        return false;
-      }
-      const weapon = getBaseWeaponData(name);
-      return weapon && !excludedGrades.has(weapon["등급"]);
-    });
-  }, [weapons, getBaseWeaponData]);
+    const getBaseWeaponData = (name) => {
+      return (
+        allWeaponsData.find(
+          (w) => w["이름"] === name && parseInt(w["강화 차수"], 10) === 0
+        ) || allWeaponsData.find((w) => w["이름"] === name)
+      );
+    };
 
-  // 데이터 로드 후, 저장된 무기 이름이 유효하지 않으면 초기화
-  useEffect(() => {
+    const weapon = getBaseWeaponData(selectedWeaponName);
+
     if (
-      uniqueWeaponNames.length > 0 &&
-      selectedWeaponName &&
-      !uniqueWeaponNames.includes(selectedWeaponName)
+      !weapon ||
+      !isEnhanceable(selectedWeaponName) ||
+      excludedNames.has(selectedWeaponName) ||
+      excludedGrades.has(weapon["등급"])
     ) {
       setSelectedWeaponName("");
     }
-  }, [uniqueWeaponNames, selectedWeaponName]); // uniqueWeaponNames가 로드된 후 실행
+  }, [allWeaponsData, selectedWeaponName]);
 
   // 상태 변경 시 sessionStorage에 저장
   useEffect(() => {
@@ -241,13 +215,12 @@ export default function SpecialWeapon() {
       };
 
       try {
-        const [weaponsData, guaranteedData, probData] = await Promise.all([
+        const [, guaranteedData, probData] = await Promise.all([
           fetchAndParse(WEAPONS_SHEET_URL, "weapons"),
           fetchAndParse(GUARANTEED_ENH_URL, "guaranteedEnhCosts"),
           fetchAndParse(PROB_ENH_URL, "probEnhCosts"),
         ]);
 
-        setWeapons(weaponsData);
         setGuaranteedEnhCosts(guaranteedData);
         setProbEnhCosts(probData);
       } catch (e) {
@@ -257,28 +230,31 @@ export default function SpecialWeapon() {
       }
     };
 
-    fetchData();
-  }, [cache, setCacheValue]);
+    if (!allWeaponsData) {
+      fetchData();
+    } else {
+      setLoading(false);
+    }
+  }, [cache, setCacheValue, allWeaponsData]);
 
   const selectedWeaponData = useMemo(() => {
-    if (!selectedWeaponName) return null;
-    // 0강 데이터를 우선적으로 찾거나, 없으면 첫 번째 데이터를 사용
+    if (!selectedWeaponName || !allWeaponsData) return null;
     return (
-      weapons.find(
+      allWeaponsData.find(
         (w) =>
           w["이름"] === selectedWeaponName && parseInt(w["강화 차수"], 10) === 0
-      ) || weapons.find((w) => w["이름"] === selectedWeaponName)
+      ) || allWeaponsData.find((w) => w["이름"] === selectedWeaponName)
     );
-  }, [weapons, selectedWeaponName]);
+  }, [allWeaponsData, selectedWeaponName]);
 
   const availableEnhancementLevels = useMemo(() => {
-    if (!selectedWeaponName) return [];
-    return weapons
+    if (!selectedWeaponName || !allWeaponsData) return [];
+    return allWeaponsData
       .filter((w) => w["이름"] === selectedWeaponName)
       .map((w) => parseInt(w["강화 차수"], 10))
       .filter((level) => !isNaN(level))
       .sort((a, b) => a - b);
-  }, [weapons, selectedWeaponName]);
+  }, [allWeaponsData, selectedWeaponName]);
 
   const handleSkipMenuOpen = (event) => {
     setSkipMenuAnchorEl(event.currentTarget);
@@ -520,36 +496,14 @@ export default function SpecialWeapon() {
         {selectedWeaponName || "무기 선택"}
       </Button>
 
-      <Modal open={isModalOpen} onClose={handleCloseModal}>
-        <Box sx={styles.modalStyle}>
-          <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-            무기 선택
-          </Typography>
-          <Box sx={styles.modalGrid}>
-            {uniqueWeaponNames.map((name) => {
-              const weapon = getBaseWeaponData(name);
-              if (!weapon) return null;
-              return (
-                <Card key={name} sx={styles.modalWeaponCard(weapon["등급"])}>
-                  <CardActionArea onClick={() => handleWeaponSelect(name)}>
-                    <CardMedia
-                      component="img"
-                      sx={styles.modalWeaponImage}
-                      image={weaponImages[`${weapon["이미지 파일"]}.webp`]}
-                      alt={name}
-                    />
-                    <CardContent sx={{ p: 0 }}>
-                      <Typography sx={styles.modalWeaponName}>
-                        {name}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              );
-            })}
-          </Box>
-        </Box>
-      </Modal>
+      <WeaponSelectionModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onWeaponSelect={handleWeaponSelect}
+        weaponsData={allWeaponsData}
+        excludedNames={excludedNames}
+        excludedGrades={excludedGrades}
+      />
 
       {selectedWeaponData && (
         <Paper elevation={3} sx={{ ...styles.selectedWeaponPaper, mt: 2 }}>
