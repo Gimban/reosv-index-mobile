@@ -108,6 +108,11 @@ const SpecialWeapon = () => {
     fetchData();
   }, [cache.weapons, setCacheValue]);
 
+  // 아이템 목록이 변경될 때마다 전역 상태를 업데이트합니다.
+  useEffect(() => {
+    updateDpsState("specialWeapons", items);
+  }, [items, updateDpsState]);
+
   const getEnhancementsForWeapon = (weaponName) => {
     if (!allWeaponsData || !weaponName) return [];
     return allWeaponsData
@@ -195,7 +200,6 @@ const SpecialWeapon = () => {
   };
 
   const handleConfirm = () => {
-    updateDpsState("specialWeapons", items);
     navigate("/dps_calc");
   };
 
