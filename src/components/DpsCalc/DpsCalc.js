@@ -13,6 +13,7 @@ import * as styles from "./DpsCalc.styles";
 const MENU_ITEMS = [
   // 예시: { id: 'basic_stats', title: '기본 스탯', path: '/dps_calc/basic_stats' },
   { id: "level", title: "레벨", path: "/dps_calc/level" },
+  { id: "class", title: "클래스", path: "/dps_calc/class" },
 ];
 
 const DpsCalc = () => {

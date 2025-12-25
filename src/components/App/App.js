@@ -18,6 +18,7 @@ const ClassDetail = lazy(() => import("../ClassDetail"));
 const EnhSim = lazy(() => import("../EnhSim"));
 const DpsCalc = lazy(() => import("../DpsCalc"));
 const Level = lazy(() => import("../DpsCalc/Level"));
+const ClassWeapon = lazy(() => import("../DpsCalc/ClassWeapon"));
 
 export default function App() {
   // const [tab, setTab] = useState(0);
@@ -100,6 +101,7 @@ export default function App() {
                   <Route path="/enh_sim" element={<EnhSim />} />
                   <Route path="/dps_calc" element={<DpsCalc />} />
                   <Route path="/dps_calc/level" element={<Level />} />
+                  <Route path="/dps_calc/class" element={<ClassWeapon />} />
                 </Routes>
               </Suspense>
               {/* <BottomNav value={tab} onChange={handleTabChange} /> */}

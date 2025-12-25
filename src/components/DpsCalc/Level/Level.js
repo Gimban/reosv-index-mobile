@@ -10,7 +10,6 @@ import {
   FormLabel,
   Paper,
   Alert,
-  InputAdornment,
 } from "@mui/material";
 import { useDpsCalc } from "../../../contexts/DpsCalcContext";
 import * as styles from "./Level.styles";
