@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
 import {
   Box,
@@ -23,6 +24,7 @@ import {
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import { CacheContext } from "../../../contexts/CacheContext";
+import { useDpsCalc } from "../../../contexts/DpsCalcContext";
 import WeaponSelectionModal from "../../WeaponSelectionModal";
 import * as styles from "./SpecialWeapon.styles";
 
@@ -32,7 +34,6 @@ const SHEET_URL = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?
 
 // EnhSim에서 사용하는 제외 목록과 동일하게 설정
 const excludedNames = new Set([
-  "방랑자, 플레탄",
   "서머 샤인",
   "오터먼트",
   "생명의 반지",
@@ -42,18 +43,29 @@ const excludedNames = new Set([
   "섀도우 소드",
   "섀도우 대거",
 ]);
-const excludedGrades = new Set(["보스", "운명", "기타"]);
+const excludedGrades = new Set([]);
 
 let idCounter = 0;
 const MAX_ITEMS = 15;
 
 const SpecialWeapon = () => {
+  const navigate = useNavigate();
   const { cache, setCacheValue } = useContext(CacheContext);
+  const { dpsState, updateDpsState } = useDpsCalc();
   const { weapons: allWeaponsData } = cache;
   const [loading, setLoading] = useState(!allWeaponsData);
   const [error, setError] = useState(null);
 
-  const [items, setItems] = useState([{ id: idCounter++, name: "", enh: 0 }]);
+  const [items, setItems] = useState(() => {
+    if (dpsState.specialWeapons && dpsState.specialWeapons.length > 0) {
+      const maxId = Math.max(...dpsState.specialWeapons.map((item) => item.id));
+      if (maxId >= idCounter) {
+        idCounter = maxId + 1;
+      }
+      return dpsState.specialWeapons;
+    }
+    return [{ id: idCounter++, name: "", enh: 0 }];
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeItemId, setActiveItemId] = useState(null);
 
@@ -131,10 +143,8 @@ const SpecialWeapon = () => {
       const cooldown = parseValue(weapon["쿨타임"]);
       const mana = parseValue(weapon["마나"]);
 
-      const totalDamage =
-        damage !== null && hits !== null ? damage * hits : 0;
-      const dps =
-        totalDamage > 0 && cooldown > 0 ? totalDamage / cooldown : 0;
+      const totalDamage = damage !== null && hits !== null ? damage * hits : 0;
+      const dps = totalDamage > 0 && cooldown > 0 ? totalDamage / cooldown : 0;
       const mps = mana > 0 && cooldown > 0 ? mana / cooldown : 0;
 
       return { dps, mps };
@@ -182,6 +192,11 @@ const SpecialWeapon = () => {
       handleItemChange(activeItemId, "name", weaponName);
     }
     handleCloseModal();
+  };
+
+  const handleConfirm = () => {
+    updateDpsState("specialWeapons", items);
+    navigate("/dps_calc");
   };
 
   const calculatedItems = useMemo(() => {
@@ -302,7 +317,12 @@ const SpecialWeapon = () => {
         </Typography>
       </Paper>
 
-      <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{ mt: 2 }}
+        onClick={handleConfirm}
+      >
         확인
       </Button>
 
