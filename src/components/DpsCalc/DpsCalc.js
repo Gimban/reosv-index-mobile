@@ -21,6 +21,7 @@ const MENU_ITEMS = [
     title: "특수 무기",
     path: "/dps_calc/special_weapon",
   },
+  { id: "accessory", title: "장신구", path: "/dps_calc/accessory" },
 ];
 
 const DpsCalc = () => {
