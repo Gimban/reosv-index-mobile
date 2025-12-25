@@ -5,9 +5,11 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import * as styles from "./DpsCalc.styles";
+import { useDpsCalc } from "../../contexts/DpsCalcContext";
 
 // 추후 추가될 항목들을 위한 설정
 const MENU_ITEMS = [
@@ -18,12 +20,20 @@ const MENU_ITEMS = [
 
 const DpsCalc = () => {
   const navigate = useNavigate();
+  const { dpsState } = useDpsCalc();
+
+  const handleStateCheck = () => {
+    console.log("DPS Calc State:", dpsState);
+  };
 
   return (
     <Box sx={styles.container}>
       <Typography variant="h5" sx={styles.title}>
         DPS Calculator
       </Typography>
+      <Button variant="contained" onClick={handleStateCheck} sx={{ mb: 2 }}>
+        전역 상태 확인
+      </Button>
       <Box sx={styles.gridContainer}>
         {MENU_ITEMS.map((item) => (
           <Card key={item.id} sx={styles.card}>
