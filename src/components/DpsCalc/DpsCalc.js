@@ -16,6 +16,11 @@ const MENU_ITEMS = [
   // 예시: { id: 'basic_stats', title: '기본 스탯', path: '/dps_calc/basic_stats' },
   { id: "level", title: "레벨", path: "/dps_calc/level" },
   { id: "class", title: "클래스", path: "/dps_calc/class" },
+  {
+    id: "special_weapon",
+    title: "특수 무기",
+    path: "/dps_calc/special_weapon",
+  },
 ];
 
 const DpsCalc = () => {
