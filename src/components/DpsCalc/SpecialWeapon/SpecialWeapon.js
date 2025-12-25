@@ -200,14 +200,34 @@ const SpecialWeapon = () => {
   };
 
   const calculatedItems = useMemo(() => {
+    const nameCounts = items.reduce((acc, item) => {
+      if (item.name) {
+        acc[item.name] = (acc[item.name] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
     return items.map((item) => {
       const { dps, mps } = calculateStats(item.name, item.enh);
-      return { ...item, dps, mps };
+      const isDuplicate = item.name ? nameCounts[item.name] > 1 : false;
+      return { ...item, dps, mps, isDuplicate };
     });
   }, [items, calculateStats]);
 
   const totalStats = useMemo(() => {
-    return calculatedItems.reduce(
+    const uniqueItems = {};
+
+    calculatedItems.forEach((item) => {
+      if (!item.name) return;
+
+      if (!uniqueItems[item.name] || item.enh > uniqueItems[item.name].enh) {
+        uniqueItems[item.name] = item;
+      }
+    });
+
+    const finalItems = Object.values(uniqueItems);
+
+    return finalItems.reduce(
       (acc, item) => {
         acc.totalDps += item.dps;
         acc.totalMps += item.mps;
@@ -289,6 +309,11 @@ const SpecialWeapon = () => {
                   </Select>
                 </FormControl>
               </Box>
+              {item.isDuplicate && (
+                <Typography color="error" variant="caption" sx={{ mt: 1 }}>
+                  * 중복된 무기입니다. 강화 수치가 가장 높은 항목만 적용됩니다.
+                </Typography>
+              )}
               <Box sx={styles.statsBox}>
                 <Typography>DPS: {item.dps.toFixed(2)}</Typography>
                 <Typography>초당 마나: {item.mps.toFixed(2)}</Typography>
