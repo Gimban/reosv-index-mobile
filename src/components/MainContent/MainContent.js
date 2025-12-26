@@ -36,6 +36,14 @@ export default function MainContent() {
   return (
     <Box component="main" sx={styles.main}>
       <Container sx={styles.container}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          align="right"
+          sx={{ display: "block", mb: 2 }}
+        >
+          by Gimban
+        </Typography>
         <Box sx={styles.list}>
           {menuItems.map((item) => (
             <Card key={item.path} component={Paper} sx={styles.card}>
