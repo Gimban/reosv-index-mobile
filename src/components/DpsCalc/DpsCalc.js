@@ -23,6 +23,7 @@ const MENU_ITEMS = [
   },
   { id: "accessory", title: "장신구", path: "/dps_calc/accessory" },
   { id: "divine_shard", title: "디바인 샤드", path: "/dps_calc/divine_shard" },
+  { id: "guild", title: "길드", path: "/dps_calc/guild" },
 ];
 
 const DpsCalc = () => {

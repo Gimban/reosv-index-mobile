@@ -22,6 +22,7 @@ const ClassWeapon = lazy(() => import("../DpsCalc/ClassWeapon"));
 const SpecialWeapon = lazy(() => import("../DpsCalc/SpecialWeapon"));
 const Accessory = lazy(() => import("../DpsCalc/Accessory"));
 const DivineShard = lazy(() => import("../DpsCalc/DivineShard"));
+const Guild = lazy(() => import("../DpsCalc/Guild"));
 
 export default function App() {
   // const [tab, setTab] = useState(0);
@@ -114,6 +115,7 @@ export default function App() {
                     path="/dps_calc/divine_shard"
                     element={<DivineShard />}
                   />
+                  <Route path="/dps_calc/guild" element={<Guild />} />
                 </Routes>
               </Suspense>
               {/* <BottomNav value={tab} onChange={handleTabChange} /> */}
