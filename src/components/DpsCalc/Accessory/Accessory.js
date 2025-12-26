@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -12,6 +12,10 @@ import {
   CardActionArea,
   CardMedia,
   CardContent,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Papa from "papaparse";
@@ -49,6 +53,7 @@ const ACCESSORY_SLOTS = [
 ];
 
 const OPTION_TYPES = ["일반", "고급", "희귀", "영웅"];
+const POTENTIAL_GRADES = ["없음", "일반", "고급", "희귀", "영웅"];
 const VALID_DPS_OPTIONS = new Set([
   "클래스 기본 공격 데미지 증가 +",
   "클래스 스킬 데미지 증가 %",
@@ -57,11 +62,13 @@ const VALID_DPS_OPTIONS = new Set([
   "일반 몬스터 대상 데미지 증가 %",
   "보스 공격 시 대상 데미지 증가 %",
   "스킬 쿨타임 감소 %",
+  "특수 무기 데미지 증가 %",
   "일반&고급 등급 무기 데미지 증가 %",
   "희귀 등급 무기 데미지 증가 %",
   "영웅 등급 무기 데미지 증가 %",
   "전설 등급 무기 데미지 증가 %",
   "전설&필멸 등급 무기 데미지 증가 %",
+  "필멸 등급 무기 데미지 증가 %",
   "운명 등급 무기 데미지 증가 %",
   "최대 마나 증가 +",
   "최대 마나 증가 %",
@@ -92,6 +99,7 @@ const Accessory = () => {
   const [selectedItems, setSelectedItems] = useState({});
   const [accessoryOptions, setAccessoryOptions] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [potentialState, setPotentialState] = useState({});
   const [activeSlot, setActiveSlot] = useState(null);
 
   useEffect(() => {
@@ -134,6 +142,47 @@ const Accessory = () => {
     fetchData();
   }, [cache.accessories, setCacheValue]);
 
+  const potentialOptionsList = useMemo(() => {
+    if (!cache.accessories?.sheet2) return [];
+    return cache.accessories.sheet2
+      .map((row) => row["옵션"])
+      .filter((opt) => opt && opt.trim() !== "");
+  }, [cache.accessories]);
+
+  const getPotentialValue = (optionName, grade) => {
+    if (!cache.accessories?.sheet2 || !optionName || !grade || grade === "없음")
+      return 0;
+    const row = cache.accessories.sheet2.find((r) => r["옵션"] === optionName);
+    return row ? Number(row[grade]) || 0 : 0;
+  };
+
+  const handlePotentialGradeChange = (slotId, grade) => {
+    setPotentialState((prev) => ({
+      ...prev,
+      [slotId]: {
+        grade,
+        options:
+          grade === "없음"
+            ? [null, null, null]
+            : prev[slotId]?.options || [null, null, null],
+      },
+    }));
+  };
+
+  const handlePotentialOptionChange = (slotId, index, optionName) => {
+    setPotentialState((prev) => {
+      const currentOptions = [...(prev[slotId]?.options || [null, null, null])];
+      currentOptions[index] = optionName;
+      return {
+        ...prev,
+        [slotId]: {
+          ...(prev[slotId] || { grade: "없음" }),
+          options: currentOptions,
+        },
+      };
+    });
+  };
+
   const handleSlotClick = (slot) => {
     setActiveSlot(slot);
     setIsModalOpen(true);
@@ -157,6 +206,12 @@ const Accessory = () => {
       } else {
         // 아이템 해제 시 해당 슬롯의 옵션 삭제
         delete newOptions[slotId];
+        // 잠재 옵션도 삭제
+        setPotentialState((prev) => {
+          const newState = { ...prev };
+          delete newState[slotId];
+          return newState;
+        });
       }
       return newOptions;
     });
@@ -285,6 +340,114 @@ const Accessory = () => {
                       </Box>
                     );
                   })}
+
+                  <Divider sx={{ my: 1.5 }} />
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ mb: 1, fontWeight: "bold" }}
+                  >
+                    잠재 옵션
+                  </Typography>
+                  <FormControl fullWidth size="small" sx={{ mb: 1.5 }}>
+                    <InputLabel>등급</InputLabel>
+                    <Select
+                      value={potentialState[slot.id]?.grade || "없음"}
+                      label="등급"
+                      onChange={(e) =>
+                        handlePotentialGradeChange(slot.id, e.target.value)
+                      }
+                    >
+                      {POTENTIAL_GRADES.map((grade) => (
+                        <MenuItem key={grade} value={grade}>
+                          {grade}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+
+                  {potentialState[slot.id]?.grade &&
+                    potentialState[slot.id].grade !== "없음" &&
+                    [0, 1, 2].map((index) => {
+                      const selectedOption =
+                        potentialState[slot.id]?.options?.[index] || "";
+                      const isDpsOption = VALID_DPS_OPTIONS.has(selectedOption);
+                      const value = getPotentialValue(
+                        selectedOption,
+                        potentialState[slot.id]?.grade
+                      );
+
+                      return (
+                        <Box
+                          key={index}
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            mb: 1,
+                            alignItems: "center",
+                          }}
+                        >
+                          <FormControl fullWidth size="small">
+                            <InputLabel>옵션 {index + 1}</InputLabel>
+                            <Select
+                              value={selectedOption}
+                              label={`옵션 ${index + 1}`}
+                              onChange={(e) =>
+                                handlePotentialOptionChange(
+                                  slot.id,
+                                  index,
+                                  e.target.value
+                                )
+                              }
+                              sx={
+                                isDpsOption
+                                  ? {
+                                      color: "primary.main",
+                                      fontWeight: "bold",
+                                      "& .MuiSelect-select": {
+                                        color: "primary.main",
+                                        fontWeight: "bold",
+                                      },
+                                    }
+                                  : {}
+                              }
+                            >
+                              <MenuItem value="">
+                                <em>선택 안 함</em>
+                              </MenuItem>
+                              {potentialOptionsList.map((opt) => (
+                                <MenuItem
+                                  key={opt}
+                                  value={opt}
+                                  sx={
+                                    VALID_DPS_OPTIONS.has(opt)
+                                      ? {
+                                          color: "primary.main",
+                                          fontWeight: "bold",
+                                        }
+                                      : {}
+                                  }
+                                >
+                                  {opt}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              minWidth: "40px",
+                              textAlign: "right",
+                              fontWeight: isDpsOption ? "bold" : "normal",
+                              color: isDpsOption
+                                ? "primary.main"
+                                : "text.primary",
+                            }}
+                          >
+                            {value > 0 ? `+${value}` : ""}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
                 </Box>
               )}
             </Paper>
