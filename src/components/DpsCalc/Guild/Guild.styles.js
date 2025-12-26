@@ -14,5 +14,10 @@ export const paper = {
   p: 2,
   display: "flex",
   flexDirection: "column",
-  gap: 2,
+};
+
+export const skillItem = {
+  display: "flex",
+  flexDirection: "column",
+  p: 1,
 };
