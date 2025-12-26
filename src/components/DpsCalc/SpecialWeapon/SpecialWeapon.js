@@ -261,20 +261,27 @@ const SpecialWeapon = () => {
     [processedWeaponData]
   );
 
-  const handleItemChange = useCallback((id, field, value) => {
-    setItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === id) {
-          const updatedItem = { ...item, [field]: value };
-          if (field === "name") {
-            updatedItem.enh = 0;
+  const handleItemChange = useCallback(
+    (id, field, value) => {
+      setItems((prevItems) =>
+        prevItems.map((item) => {
+          if (item.id === id) {
+            const updatedItem = { ...item, [field]: value };
+            if (field === "name") {
+              const weaponData = processedWeaponData[value];
+              updatedItem.enh =
+                weaponData && weaponData.enhancements.length > 0
+                  ? weaponData.enhancements[0]
+                  : 0;
+            }
+            return updatedItem;
           }
-          return updatedItem;
-        }
-        return item;
-      })
-    );
-  }, []);
+          return item;
+        })
+      );
+    },
+    [processedWeaponData]
+  );
 
   const handleAddItem = useCallback(() => {
     setItems((prevItems) => {
