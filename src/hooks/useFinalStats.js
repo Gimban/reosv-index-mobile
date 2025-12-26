@@ -266,12 +266,16 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
     const totalDpsVsNormal =
       finalDps * (1 + acc.normalMonsterDamagePercent / 100);
     const totalDpsVsBoss = finalDps * (1 + acc.bossMonsterDamagePercent / 100);
+    const totalDpmVsNormal = totalDpsVsNormal * 60;
+    const totalDpmVsBoss = totalDpsVsBoss * 60;
 
     return {
       totalDps: finalDps,
       totalDpsVsNormal,
       totalDpsVsBoss,
       totalDpm: finalDps * 60,
+      totalDpmVsNormal,
+      totalDpmVsBoss,
       totalMps,
       totalMpr,
       totalMaxMana,

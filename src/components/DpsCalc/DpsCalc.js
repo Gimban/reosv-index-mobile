@@ -79,16 +79,16 @@ const DpsCalc = () => {
           최종 계산 결과
         </Typography>
         <Typography>
-          총 DPS (허수아비): {finalStats.totalDps.toFixed(2)}
-        </Typography>
-        <Typography>
           총 DPS (일반): {finalStats.totalDpsVsNormal.toFixed(2)}
         </Typography>
         <Typography>
           총 DPS (보스): {finalStats.totalDpsVsBoss.toFixed(2)}
         </Typography>
         <Typography>
-          총 DPM (허수아비): {finalStats.totalDpm.toFixed(2)}
+          총 DPM (일반): {finalStats.totalDpmVsNormal.toFixed(2)}
+        </Typography>
+        <Typography>
+          총 DPM (보스): {finalStats.totalDpmVsBoss.toFixed(2)}
         </Typography>
         <Typography>최대 마나: {finalStats.totalMaxMana.toFixed(2)}</Typography>
         <Typography>

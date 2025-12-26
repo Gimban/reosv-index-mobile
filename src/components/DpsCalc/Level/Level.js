@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   TextField,
@@ -10,11 +11,13 @@ import {
   FormLabel,
   Paper,
   Alert,
+  Button,
 } from "@mui/material";
 import { useDpsCalc } from "../../../contexts/DpsCalcContext";
 import * as styles from "./Level.styles";
 
 const Level = () => {
+  const navigate = useNavigate();
   const { dpsState, updateDpsState } = useDpsCalc();
 
   // 전역 상태에서 초기값 로드, 없으면 기본값 사용
@@ -225,6 +228,14 @@ const Level = () => {
           <Typography>{manaRegen.toFixed(2)} /초</Typography>
         </Box>
       </Paper>
+      <Button
+        variant="contained"
+        fullWidth
+        onClick={() => navigate("/dps_calc")}
+        sx={{ mt: 2 }}
+      >
+        확인
+      </Button>
     </Box>
   );
 };

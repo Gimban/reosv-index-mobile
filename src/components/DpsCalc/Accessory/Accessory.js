@@ -563,6 +563,15 @@ const Accessory = () => {
         </Paper>
       )}
 
+      <Button
+        variant="contained"
+        fullWidth
+        onClick={() => navigate("/dps_calc")}
+        sx={{ mt: 2 }}
+      >
+        확인
+      </Button>
+
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box sx={styles.modalStyle}>
           <Typography variant="h6" component="h2" sx={{ mb: 2 }}>

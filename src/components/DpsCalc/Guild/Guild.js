@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -6,6 +7,7 @@ import {
   Slider,
   IconButton,
   Stack,
+  Button,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -27,6 +29,7 @@ const GUILD_SKILLS = [
 ];
 
 const Guild = () => {
+  const navigate = useNavigate();
   const { dpsState, updateDpsState } = useDpsCalc();
   const guildState = dpsState.guild || {};
 
@@ -117,6 +120,14 @@ const Guild = () => {
           })}
         </Stack>
       </Paper>
+      <Button
+        variant="contained"
+        fullWidth
+        onClick={() => navigate("/dps_calc")}
+        sx={{ mt: 2 }}
+      >
+        확인
+      </Button>
     </Box>
   );
 };

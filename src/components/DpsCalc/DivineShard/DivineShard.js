@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -9,6 +10,7 @@ import {
   Switch,
   FormControlLabel,
   Slider,
+  Button,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -28,6 +30,7 @@ const calculateUsedPoints = (stats) => {
 };
 
 const DivineShard = () => {
+  const navigate = useNavigate();
   const { dpsState, updateDpsState } = useDpsCalc();
   const [showValidOnly, setShowValidOnly] = useState(true);
 
@@ -245,6 +248,14 @@ const DivineShard = () => {
           </Paper>
         );
       })}
+      <Button
+        variant="contained"
+        fullWidth
+        onClick={() => navigate("/dps_calc")}
+        sx={{ mt: 2 }}
+      >
+        확인
+      </Button>
     </Box>
   );
 };
