@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { SHARED_STAT_INFO } from "../components/DpsCalc/DivineShard/DivineShardData";
 
 export const useFinalStats = (dpsState, processedWeaponData) => {
   const finalStats = useMemo(() => {
@@ -139,7 +140,7 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       statType = "attack",
       customAttack = 0,
       customHealth = 0,
-    } = dpsState.level || {};
+    } = dpsState || {};
 
     const safeLevel = parseInt(level, 10) || 1;
     const totalPoints = Math.max(0, safeLevel - 1);
@@ -172,8 +173,39 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
     damageBonusFromStats += acc.finalDamageStat * 0.65;
     damageBonusFromStats += acc.healthStat * 0.4;
 
+    // 길드 업그레이드 (길드원의 유대)
+    const guildState = dpsState.guild || {};
+    const bondLevel = parseInt(guildState.atk_percent || 1, 10);
+    const bondBonusPoints = Math.max(0, bondLevel - 1);
+    damageBonusFromStats += bondBonusPoints * 1 * 0.65; // 공격력 스탯
+    damageBonusFromStats += bondBonusPoints * 1 * 0.4; // 체력 스탯
+
+    // 디바인 샤드
+    let shardFinalDamagePercent = 0;
+    let shardMaxManaFlat = 0;
+    let shardManaRegenFlat = 0;
+
+    if (dpsState.divineShard) {
+      Object.values(dpsState.divineShard).forEach((shard) => {
+        if (!shard.stats) return;
+        shard.stats.forEach((level, index) => {
+          if (level <= 0) return;
+          const statInfo = SHARED_STAT_INFO[index];
+          if (!statInfo) return;
+
+          if (statInfo.name === "최종 데미지 증가") {
+            shardFinalDamagePercent += statInfo.effects[0].values[level] || 0;
+          } else if (statInfo.name === "최대 마나 & 마나 회복량 증가") {
+            shardMaxManaFlat += statInfo.effects[0].values[level] || 0;
+            shardManaRegenFlat += statInfo.effects[1].values[level] || 0;
+          }
+        });
+      });
+    }
+
     // 최종 대미지 배율에 합산
-    finalDamageMultiplier += damageBonusFromStats / 100;
+    finalDamageMultiplier +=
+      (damageBonusFromStats + shardFinalDamagePercent) / 100;
 
     // 마나 계산
     // 최대 마나: 기본 100, 5레벨마다 5 증가
@@ -182,9 +214,10 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
     const manaRegenFromLevel = 4 + Math.floor(safeLevel / 5) * 0.05;
 
     totalMaxMana =
-      (baseMaxManaFromLevel + acc.maxManaFlat) * (1 + acc.maxManaPercent / 100);
+      (baseMaxManaFromLevel + acc.maxManaFlat + shardMaxManaFlat) *
+      (1 + acc.maxManaPercent / 100);
     totalMpr =
-      (manaRegenFromLevel + acc.manaRegenFlat) *
+      (manaRegenFromLevel + acc.manaRegenFlat + shardManaRegenFlat) *
       (1 + acc.manaRegenPercent / 100);
 
     // 3. 클래스 스탯 계산
@@ -226,8 +259,6 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
         }
       });
     }
-
-    // TODO: 장신구, 디바인, 길드 스탯 계산 추가
 
     // 최종 DPS 계산 (모든 배율 적용)
     const finalDps = baseDps * finalDamageMultiplier;
