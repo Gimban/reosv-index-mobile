@@ -16,14 +16,19 @@ const menuItems = [
     path: "/weapons",
   },
   {
+    title: "직업 무기",
+    description: "각 직업별 정보를 확인하세요.",
+    path: "/class",
+  },
+  {
     title: "강화 시뮬레이터",
     description: "무기 강화 비용과 확률을 시뮬레이션 해보세요.",
     path: "/enh_sim",
   },
   {
-    title: "직업 무기",
-    description: "각 직업별 정보를 확인하세요.",
-    path: "/class",
+    title: "DPS 계산기",
+    description: "현재 능력치를 계산해보세요.",
+    path: "/dps_calc",
   },
 ];
 
