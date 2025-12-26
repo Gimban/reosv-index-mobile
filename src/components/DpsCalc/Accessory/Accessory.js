@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   Box,
   Typography,
@@ -90,16 +96,21 @@ const FIXED_OPTIONS = {
 
 const Accessory = () => {
   const navigate = useNavigate();
-  // eslint-disable-next-line no-unused-vars
   const { dpsState, updateDpsState } = useDpsCalc();
   const { cache, setCacheValue } = useContext(CacheContext);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedItems, setSelectedItems] = useState({});
-  const [accessoryOptions, setAccessoryOptions] = useState({});
+  const [selectedItems, setSelectedItems] = useState(
+    dpsState.accessories?.selectedItems || {}
+  );
+  const [accessoryOptions, setAccessoryOptions] = useState(
+    dpsState.accessories?.accessoryOptions || {}
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [potentialState, setPotentialState] = useState({});
+  const [potentialState, setPotentialState] = useState(
+    dpsState.accessories?.potentialState || {}
+  );
   const [activeSlot, setActiveSlot] = useState(null);
 
   useEffect(() => {
@@ -142,6 +153,23 @@ const Accessory = () => {
     fetchData();
   }, [cache.accessories, setCacheValue]);
 
+  const getPotentialValue = useCallback(
+    (optionName, grade) => {
+      if (
+        !cache.accessories?.sheet2 ||
+        !optionName ||
+        !grade ||
+        grade === "없음"
+      )
+        return 0;
+      const row = cache.accessories.sheet2.find(
+        (r) => r["옵션"] === optionName
+      );
+      return row ? Number(row[grade]) || 0 : 0;
+    },
+    [cache.accessories]
+  );
+
   const potentialOptionsList = useMemo(() => {
     if (!cache.accessories?.sheet2) return [];
     return cache.accessories.sheet2
@@ -149,12 +177,59 @@ const Accessory = () => {
       .filter((opt) => opt && opt.trim() !== "");
   }, [cache.accessories]);
 
-  const getPotentialValue = (optionName, grade) => {
-    if (!cache.accessories?.sheet2 || !optionName || !grade || grade === "없음")
-      return 0;
-    const row = cache.accessories.sheet2.find((r) => r["옵션"] === optionName);
-    return row ? Number(row[grade]) || 0 : 0;
-  };
+  const totalStats = useMemo(() => {
+    const totals = {};
+
+    // 1. 기본 및 추가 옵션
+    Object.values(accessoryOptions).forEach((itemOptions) => {
+      Object.entries(itemOptions).forEach(([optionName, value]) => {
+        if (VALID_DPS_OPTIONS.has(optionName)) {
+          totals[optionName] = (totals[optionName] || 0) + (Number(value) || 0);
+        }
+      });
+    });
+
+    // 2. 잠재 옵션
+    Object.values(potentialState).forEach((slotPotential) => {
+      if (
+        slotPotential &&
+        slotPotential.grade !== "없음" &&
+        slotPotential.options
+      ) {
+        slotPotential.options.forEach((optionName) => {
+          if (optionName && VALID_DPS_OPTIONS.has(optionName)) {
+            const value = getPotentialValue(optionName, slotPotential.grade);
+            totals[optionName] = (totals[optionName] || 0) + value;
+          }
+        });
+      }
+    });
+
+    const finalTotals = {};
+    Object.entries(totals).forEach(([key, value]) => {
+      if (value !== 0) {
+        finalTotals[key] = value;
+      }
+    });
+
+    return finalTotals;
+  }, [accessoryOptions, potentialState, getPotentialValue]);
+
+  // 상태 변경 시 자동으로 전역 상태 업데이트
+  useEffect(() => {
+    updateDpsState("accessories", {
+      selectedItems,
+      accessoryOptions,
+      potentialState,
+      totalStats,
+    });
+  }, [
+    selectedItems,
+    accessoryOptions,
+    potentialState,
+    totalStats,
+    updateDpsState,
+  ]);
 
   const handlePotentialGradeChange = (slotId, grade) => {
     setPotentialState((prev) => ({
@@ -265,9 +340,11 @@ const Accessory = () => {
         <Typography variant="h5" sx={styles.title}>
           장신구 설정
         </Typography>
-        <Button variant="outlined" onClick={() => navigate("/dps_calc")}>
-          뒤로 가기
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button variant="outlined" onClick={() => navigate("/dps_calc")}>
+            뒤로 가기
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={styles.slotsContainer}>
@@ -454,6 +531,37 @@ const Accessory = () => {
           );
         })}
       </Box>
+
+      {Object.keys(totalStats).length > 0 && (
+        <Paper elevation={3} sx={{ p: 2, mt: 2 }}>
+          <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
+            옵션 총합
+          </Typography>
+          <Divider />
+          <Box
+            sx={{
+              mt: 1.5,
+              display: "grid",
+              gridTemplateColumns: "1fr auto",
+              gap: "8px 16px",
+              alignItems: "center",
+            }}
+          >
+            {Object.entries(totalStats).map(([option, value]) => (
+              <React.Fragment key={option}>
+                <Typography variant="body2">{option}</Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: "bold", textAlign: "right" }}
+                >
+                  {value > 0 ? "+" : ""}
+                  {Number.isInteger(value) ? value : value.toFixed(2)}
+                </Typography>
+              </React.Fragment>
+            ))}
+          </Box>
+        </Paper>
+      )}
 
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box sx={styles.modalStyle}>
