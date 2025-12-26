@@ -22,6 +22,7 @@ const MENU_ITEMS = [
     path: "/dps_calc/special_weapon",
   },
   { id: "accessory", title: "장신구", path: "/dps_calc/accessory" },
+  { id: "divine_shard", title: "디바인 샤드", path: "/dps_calc/divine_shard" },
 ];
 
 const DpsCalc = () => {
