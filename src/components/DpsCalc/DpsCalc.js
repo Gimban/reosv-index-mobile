@@ -99,9 +99,9 @@ const DpsCalc = () => {
         </Typography>
       </Paper>
       <Divider sx={{ mb: 2 }} />
-      <Button variant="contained" onClick={handleStateCheck} sx={{ mb: 2 }}>
+      {/* <Button variant="contained" onClick={handleStateCheck} sx={{ mb: 2 }}>
         전역 상태 확인
-      </Button>
+      </Button> */}
       <Box sx={styles.gridContainer}>
         {MENU_ITEMS.map((item) => (
           <Card key={item.id} sx={styles.card}>
