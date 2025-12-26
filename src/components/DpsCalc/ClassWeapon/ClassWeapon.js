@@ -53,8 +53,12 @@ const SkillInfo = ({ data }) => {
             const damageStr = String(damage || "");
             const cooldownStr = String(cooldown || "");
 
-            const isDamageEmpty = !damageStr || damageStr.trim() === "" || damageStr.trim() === "0";
-            const isCooldownEmpty = !cooldownStr || cooldownStr.trim() === "" || cooldownStr.trim() === "0";
+            const isDamageEmpty =
+              !damageStr || damageStr.trim() === "" || damageStr.trim() === "0";
+            const isCooldownEmpty =
+              !cooldownStr ||
+              cooldownStr.trim() === "" ||
+              cooldownStr.trim() === "0";
 
             if (isDamageEmpty && isCooldownEmpty) return null;
 
@@ -97,7 +101,7 @@ const ClassWeapon = () => {
   const [enhancements, setEnhancements] = useState([]);
   const [selectedEnhancement, setSelectedEnhancement] = useState("");
   const [selectedStats, setSelectedStats] = useState(null);
-  
+
   // 데이터 로드 후 전역 상태를 적용했는지 추적하는 상태
   const [isGlobalStateApplied, setIsGlobalStateApplied] = useState(false);
 
@@ -146,56 +150,86 @@ const ClassWeapon = () => {
     if (allClasses.length === 0) return;
 
     // 클래스 목록 채우기
-    const uniqueCls = [...new Set(allClasses.map((item) => item["클래스"]))].sort();
+    const uniqueCls = [
+      ...new Set(allClasses.map((item) => item["클래스"])),
+    ].sort();
     setUniqueClasses(uniqueCls);
 
     // 전역 상태 적용 로직
     if (dpsState.classStats && !isGlobalStateApplied) {
-        const {
-            "클래스": className,
-            "전직 차수": advName,
-            "강화 차수": enhName,
-        } = dpsState.classStats;
+      const {
+        클래스: className,
+        "전직 차수": advName,
+        "강화 차수": enhName,
+      } = dpsState.classStats;
 
-        if (uniqueCls.includes(className)) {
-            // 1. 클래스 설정
-            setSelectedClass(className);
+      if (uniqueCls.includes(className)) {
+        // 1. 클래스 설정
+        setSelectedClass(className);
 
-            // 2. 전직 차수 목록 생성 및 설정
-            const advs = [...new Set(allClasses.filter(c => c["클래스"] === className).map(c => c["전직 차수"]))].sort((a, b) => a - b);
-            setAdvancements(advs);
-            if (advs.includes(advName)) {
-                setSelectedAdvancement(advName);
+        // 2. 전직 차수 목록 생성 및 설정
+        const advs = [
+          ...new Set(
+            allClasses
+              .filter((c) => c["클래스"] === className)
+              .map((c) => c["전직 차수"])
+          ),
+        ].sort((a, b) => a - b);
+        setAdvancements(advs);
+        if (advs.includes(advName)) {
+          setSelectedAdvancement(advName);
 
-                // 3. 강화 차수 목록 생성 및 설정
-                const enhs = [...new Set(allClasses.filter(c => c["클래스"] === className && c["전직 차수"] === advName).map(c => c["강화 차수"]))].sort((a, b) => a - b);
-                setEnhancements(enhs);
-                if (enhs.includes(enhName)) {
-                    setSelectedEnhancement(enhName);
-                }
-            }
-            // 전체 스탯 정보 설정
-            setSelectedStats(dpsState.classStats);
+          // 3. 강화 차수 목록 생성 및 설정
+          const enhs = [
+            ...new Set(
+              allClasses
+                .filter(
+                  (c) => c["클래스"] === className && c["전직 차수"] === advName
+                )
+                .map((c) => c["강화 차수"])
+            ),
+          ].sort((a, b) => a - b);
+          setEnhancements(enhs);
+          if (enhs.includes(enhName)) {
+            setSelectedEnhancement(enhName);
+          }
         }
-        setIsGlobalStateApplied(true);
+        // 전체 스탯 정보 설정
+        setSelectedStats(dpsState.classStats);
+      }
+      setIsGlobalStateApplied(true);
     }
   }, [allClasses, dpsState.classStats, isGlobalStateApplied]);
 
-
   // 3. 사용자 선택에 따른 드롭다운 메뉴 업데이트
   useEffect(() => {
-    if(!selectedClass) return;
-    const advs = [...new Set(allClasses.filter((c) => c["클래스"] === selectedClass).map((c) => c["전직 차수"]))].sort((a,b) => a-b);
+    if (!selectedClass) return;
+    const advs = [
+      ...new Set(
+        allClasses
+          .filter((c) => c["클래스"] === selectedClass)
+          .map((c) => c["전직 차수"])
+      ),
+    ].sort((a, b) => a - b);
     setAdvancements(advs);
   }, [selectedClass, allClasses]);
-  
+
   useEffect(() => {
-    if(!selectedAdvancement) return;
+    if (!selectedAdvancement) return;
     const selectedAdvNumber = parseInt(selectedAdvancement, 10);
-    const enhs = [...new Set(allClasses.filter((c) => c["클래스"] === selectedClass && c["전직 차수"] === selectedAdvNumber).map((c) => c["강화 차수"]))].sort((a,b) => a-b);
+    const enhs = [
+      ...new Set(
+        allClasses
+          .filter(
+            (c) =>
+              c["클래스"] === selectedClass &&
+              c["전직 차수"] === selectedAdvNumber
+          )
+          .map((c) => c["강화 차수"])
+      ),
+    ].sort((a, b) => a - b);
     setEnhancements(enhs);
   }, [selectedAdvancement, selectedClass, allClasses]);
-
 
   const handleClassChange = (e) => {
     const newClass = e.target.value;
@@ -216,11 +250,11 @@ const ClassWeapon = () => {
     setEnhancements([]);
     setSelectedStats(null);
   };
-  
+
   const handleEnhancementChange = (e) => {
     const newEnh = e.target.value;
     setSelectedEnhancement(newEnh);
-    
+
     const selectedAdvNumber = parseInt(selectedAdvancement, 10);
     const newEnhNumber = parseInt(newEnh, 10);
 
@@ -266,21 +300,64 @@ const ClassWeapon = () => {
         클래스 능력치 설정
       </Typography>
       <Box component="form" sx={styles.form}>
-        <TextField select label="클래스 선택" value={selectedClass} onChange={handleClassChange} fullWidth>
-          {uniqueClasses.map((cls) => (<MenuItem key={cls} value={cls}>{cls}</MenuItem>))}
+        <TextField
+          select
+          label="클래스 선택"
+          value={selectedClass}
+          onChange={handleClassChange}
+          fullWidth
+          slotProps={{ select: { inputProps: { "aria-hidden": "false" } } }}
+          disablerestorefocus="true"
+        >
+          {uniqueClasses.map((cls) => (
+            <MenuItem key={cls} value={cls}>
+              {cls}
+            </MenuItem>
+          ))}
         </TextField>
 
-        <TextField select label="전직 차수" value={selectedAdvancement} onChange={handleAdvancementChange} fullWidth disabled={!selectedClass}>
-          {advancements.map((adv) => (<MenuItem key={adv} value={adv}>{adv}</MenuItem>))}
+        <TextField
+          select
+          label="전직 차수"
+          value={selectedAdvancement}
+          onChange={handleAdvancementChange}
+          fullWidth
+          disabled={!selectedClass}
+          slotProps={{ select: { inputProps: { "aria-hidden": "false" } } }}
+          disablerestorefocus="true"
+        >
+          {advancements.map((adv) => (
+            <MenuItem key={adv} value={adv}>
+              {adv}
+            </MenuItem>
+          ))}
         </TextField>
 
-        <TextField select label="강화 단계" value={selectedEnhancement} onChange={handleEnhancementChange} fullWidth disabled={!selectedAdvancement}>
-          {enhancements.map((enh) => (<MenuItem key={enh} value={enh}>{enh}</MenuItem>))}
+        <TextField
+          select
+          label="강화 단계"
+          value={selectedEnhancement}
+          onChange={handleEnhancementChange}
+          fullWidth
+          disabled={!selectedAdvancement}
+          slotProps={{ select: { inputProps: { "aria-hidden": "false" } } }}
+          disablerestorefocus="true"
+        >
+          {enhancements.map((enh) => (
+            <MenuItem key={enh} value={enh}>
+              {enh}
+            </MenuItem>
+          ))}
         </TextField>
 
         <SkillInfo data={selectedStats} />
 
-        <Button variant="contained" onClick={handleSave} fullWidth sx={styles.button}>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          fullWidth
+          sx={styles.button}
+        >
           저장
         </Button>
       </Box>
