@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useContext } from "react";
 import {
   Box,
   Typography,
@@ -6,10 +6,14 @@ import {
   CardActionArea,
   CardContent,
   Button,
+  Paper,
+  Divider,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import * as styles from "./DpsCalc.styles";
 import { useDpsCalc } from "../../contexts/DpsCalcContext";
+import { CacheContext } from "../../contexts/CacheContext";
+import { useFinalStats } from "../../hooks/useFinalStats";
 
 // 추후 추가될 항목들을 위한 설정
 const MENU_ITEMS = [
@@ -29,16 +33,61 @@ const MENU_ITEMS = [
 const DpsCalc = () => {
   const navigate = useNavigate();
   const { dpsState } = useDpsCalc();
+  const { cache } = useContext(CacheContext);
+  const { weapons: allWeaponsData } = cache;
 
   const handleStateCheck = () => {
     console.log("DPS Calc State:", dpsState);
   };
+
+  // 특수 무기 데이터를 계산에 용이하도록 가공
+  const processedWeaponData = useMemo(() => {
+    if (!allWeaponsData) return {};
+    const data = {};
+    allWeaponsData.forEach((w) => {
+      const name = w["이름"];
+      if (!name) return;
+      if (!data[name]) {
+        data[name] = {
+          enhancements: [],
+          byEnhancement: {},
+        };
+      }
+      const enh = parseInt(w["강화 차수"], 10);
+      if (!isNaN(enh)) {
+        data[name].enhancements.push(enh);
+        data[name].byEnhancement[enh] = w;
+      }
+    });
+
+    Object.values(data).forEach((entry) => {
+      entry.enhancements.sort((a, b) => a - b);
+    });
+
+    return data;
+  }, [allWeaponsData]);
+
+  const finalStats = useFinalStats(dpsState, processedWeaponData);
 
   return (
     <Box sx={styles.container}>
       <Typography variant="h5" sx={styles.title}>
         DPS Calculator
       </Typography>
+      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          최종 계산 결과
+        </Typography>
+        <Typography>총 DPS: {finalStats.totalDps.toFixed(2)}</Typography>
+        <Typography>총 DPM: {finalStats.totalDpm.toFixed(2)}</Typography>
+        <Typography>
+          초당 마나 소모: {finalStats.totalMps.toFixed(2)}
+        </Typography>
+        <Typography>
+          초당 마나 회복: {finalStats.totalMpr.toFixed(2)}
+        </Typography>
+      </Paper>
+      <Divider sx={{ mb: 2 }} />
       <Button variant="contained" onClick={handleStateCheck} sx={{ mb: 2 }}>
         전역 상태 확인
       </Button>
