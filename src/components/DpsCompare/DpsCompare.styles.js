@@ -7,11 +7,8 @@ export const MainContainer = styled(Box)(({ theme }) => ({
 
 export const ComparisonContainer = styled(Box)(({ theme }) => ({
   display: "grid",
-  gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns: "1fr",
   gap: theme.spacing(2),
-  [theme.breakpoints.down("md")]: {
-    gridTemplateColumns: "1fr",
-  },
 }));
 
 export const SlotContainer = styled(Paper)(({ theme }) => ({

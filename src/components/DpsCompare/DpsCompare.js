@@ -119,11 +119,13 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
         }
         if (grade === "전설") {
           weaponDamageMultiplier += acc.legendaryWeaponDamagePercent / 100;
-          weaponDamageMultiplier += acc.legendaryMortalWeaponDamagePercent / 100;
+          weaponDamageMultiplier +=
+            acc.legendaryMortalWeaponDamagePercent / 100;
         }
         if (grade === "필멸") {
           weaponDamageMultiplier += acc.mortalWeaponDamagePercent / 100;
-          weaponDamageMultiplier += acc.legendaryMortalWeaponDamagePercent / 100;
+          weaponDamageMultiplier +=
+            acc.legendaryMortalWeaponDamagePercent / 100;
         }
         if (grade === "운명") {
           weaponDamageMultiplier += acc.destinyWeaponDamagePercent / 100;
@@ -260,10 +262,13 @@ const StatDisplay = ({ title, stats, compareStats }) => {
     <>
       <Typography variant="h6">{title}</Typography>
       {Object.entries(stats).map(([key, value]) => {
+        const isLowerBetter = key === "초당 마나 소모";
         const isHighlighted =
           compareStats &&
           typeof value === "number" &&
-          value > (compareStats[key] || 0);
+          (isLowerBetter
+            ? value < (compareStats[key] || 0)
+            : value > (compareStats[key] || 0));
         return (
           <StatRow key={key}>
             <StatName variant="body1">{key}</StatName>
@@ -339,10 +344,7 @@ const DpsCompare = () => {
       </Typography>
       <ComparisonContainer>
         <SlotContainer>
-          <UploadButton
-            variant="contained"
-            component="label"
-          >
+          <UploadButton variant="contained" component="label">
             슬롯 A 파일 업로드
             <input
               type="file"
@@ -351,13 +353,14 @@ const DpsCompare = () => {
               onChange={(e) => handleFileUpload(e, setSlotA)}
             />
           </UploadButton>
-          <StatDisplay title="슬롯 A 결과" stats={statsA} compareStats={statsB} />
+          <StatDisplay
+            title="슬롯 A 결과"
+            stats={statsA}
+            compareStats={statsB}
+          />
         </SlotContainer>
         <SlotContainer>
-          <UploadButton
-            variant="contained"
-            component="label"
-          >
+          <UploadButton variant="contained" component="label">
             슬롯 B 파일 업로드
             <input
               type="file"
@@ -366,7 +369,11 @@ const DpsCompare = () => {
               onChange={(e) => handleFileUpload(e, setSlotB)}
             />
           </UploadButton>
-          <StatDisplay title="슬롯 B 결과" stats={statsB} compareStats={statsA} />
+          <StatDisplay
+            title="슬롯 B 결과"
+            stats={statsB}
+            compareStats={statsA}
+          />
         </SlotContainer>
       </ComparisonContainer>
     </MainContainer>
