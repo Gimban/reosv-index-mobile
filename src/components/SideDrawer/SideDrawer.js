@@ -16,6 +16,7 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import SpeedIcon from "@mui/icons-material/Speed";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import * as styles from "./SideDrawer.styles";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
@@ -26,6 +27,7 @@ const menuItems = [
   { text: "직업 무기", icon: <ArticleIcon />, path: "/class" },
   { text: "강화 시뮬레이터", icon: <CalculateIcon />, path: "/enh_sim" },
   { text: "DPS 계산기", icon: <SpeedIcon />, path: "/dps_calc" },
+  { text: "DPS 비교", icon: <CompareArrowsIcon />, path: "/dps_compare" },
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {

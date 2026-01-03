@@ -30,6 +30,11 @@ const menuItems = [
     description: "현재 능력치를 계산해보세요.",
     path: "/dps_calc",
   },
+  {
+    title: "DPS 비교",
+    description: "두 결과를 비교해보세요.",
+    path: "/dps_compare",
+  },
 ];
 
 export default function MainContent() {
