@@ -45,7 +45,20 @@ const DataPersistence = ({ data, onImport }) => {
           !Array.isArray(importedData)
         ) {
           if (onImport) {
-            onImport(importedData);
+            const processedData = { ...importedData };
+            if (
+              processedData.specialWeapons &&
+              Array.isArray(processedData.specialWeapons)
+            ) {
+              const MAX_SPECIAL_WEAPONS = 20;
+              if (
+                processedData.specialWeapons.length > MAX_SPECIAL_WEAPONS
+              ) {
+                processedData.specialWeapons =
+                  processedData.specialWeapons.slice(0, MAX_SPECIAL_WEAPONS);
+              }
+            }
+            onImport(processedData);
             alert("데이터를 성공적으로 불러왔습니다.");
           }
         } else {
