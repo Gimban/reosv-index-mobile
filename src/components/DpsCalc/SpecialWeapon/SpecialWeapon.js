@@ -46,7 +46,7 @@ const excludedNames = new Set([
 const excludedGrades = new Set([]);
 
 let idCounter = 0;
-const MAX_ITEMS = 15;
+const MAX_ITEMS = 20;
 
 const SpecialWeaponItem = React.memo(
   ({
