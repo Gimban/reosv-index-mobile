@@ -147,7 +147,18 @@ const SpecialWeapon = () => {
       }
       return dpsState.specialWeapons;
     }
-    return [{ id: idCounter++, name: "", enh: 0 }];
+    return [
+      {
+        id: idCounter++,
+        name: "",
+        enh: 0,
+        damage: null,
+        hits: null,
+        cooldown: null,
+        mana: null,
+        grade: null,
+      },
+    ];
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeItemId, setActiveItemId] = useState(null);
@@ -267,13 +278,37 @@ const SpecialWeapon = () => {
         prevItems.map((item) => {
           if (item.id === id) {
             const updatedItem = { ...item, [field]: value };
+
+            const weaponName = field === "name" ? value : item.name;
+            let enhancement = field === "enh" ? value : item.enh;
+
             if (field === "name") {
-              const weaponData = processedWeaponData[value];
-              updatedItem.enh =
+              // if name changes, reset enhancement to the first available one
+              const weaponData = processedWeaponData[weaponName];
+              enhancement =
                 weaponData && weaponData.enhancements.length > 0
                   ? weaponData.enhancements[0]
                   : 0;
+              updatedItem.enh = enhancement;
             }
+
+            const weaponData = processedWeaponData[weaponName];
+            const weaponStats = weaponData?.byEnhancement[enhancement];
+
+            if (weaponStats) {
+              updatedItem.damage = weaponStats["피해량"];
+              updatedItem.hits = weaponStats["타수"];
+              updatedItem.cooldown = weaponStats["쿨타임"];
+              updatedItem.mana = weaponStats["마나"];
+              updatedItem.grade = weaponStats["등급"];
+            } else {
+              updatedItem.damage = null;
+              updatedItem.hits = null;
+              updatedItem.cooldown = null;
+              updatedItem.mana = null;
+              updatedItem.grade = null;
+            }
+
             return updatedItem;
           }
           return item;
@@ -286,7 +321,19 @@ const SpecialWeapon = () => {
   const handleAddItem = useCallback(() => {
     setItems((prevItems) => {
       if (prevItems.length < MAX_ITEMS) {
-        return [...prevItems, { id: idCounter++, name: "", enh: 0 }];
+        return [
+          ...prevItems,
+          {
+            id: idCounter++,
+            name: "",
+            enh: 0,
+            damage: null,
+            hits: null,
+            cooldown: null,
+            mana: null,
+            grade: null,
+          },
+        ];
       }
       return prevItems;
     });

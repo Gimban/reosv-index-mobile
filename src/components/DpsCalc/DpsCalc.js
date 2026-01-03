@@ -14,6 +14,7 @@ import * as styles from "./DpsCalc.styles";
 import { useDpsCalc } from "../../contexts/DpsCalcContext";
 import { CacheContext } from "../../contexts/CacheContext";
 import { useFinalStats } from "../../hooks/useFinalStats";
+import DataPersistence from "./DataPersistence";
 
 // 추후 추가될 항목들을 위한 설정
 const MENU_ITEMS = [
@@ -32,7 +33,7 @@ const MENU_ITEMS = [
 
 const DpsCalc = () => {
   const navigate = useNavigate();
-  const { dpsState } = useDpsCalc();
+  const { dpsState, setDpsState } = useDpsCalc();
   const { cache } = useContext(CacheContext);
   const { weapons: allWeaponsData } = cache;
 
@@ -99,6 +100,7 @@ const DpsCalc = () => {
         </Typography>
       </Paper>
       <Divider sx={{ mb: 2 }} />
+      <DataPersistence data={dpsState} onImport={setDpsState} />
       {/* <Button variant="contained" onClick={handleStateCheck} sx={{ mb: 2 }}>
         전역 상태 확인
       </Button> */}

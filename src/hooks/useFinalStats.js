@@ -52,43 +52,7 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       1 - Math.min(acc.cooldownReductionPercent, 40) / 100;
 
     // 1. 특수 무기 DPS 및 마나 소모 계산 (Base DPS)
-    if (
-      dpsState.specialWeapons &&
-      Object.keys(processedWeaponData).length > 0
-    ) {
-      const calculateWeaponStats = (weaponName, enhancement) => {
-        const weaponData = processedWeaponData[weaponName];
-        if (!weaponData) return { dps: 0, mps: 0, grade: null };
-        const weapon = weaponData.byEnhancement[enhancement];
-        if (!weapon) return { dps: 0, mps: 0, grade: null };
-
-        const parseValue = (str) => {
-          if (!str) return null;
-          const num = parseFloat(str);
-          return isNaN(num) ? null : num;
-        };
-
-        const damage = parseValue(weapon["피해량"]);
-        const hits = parseValue(weapon["타수"]);
-        const cooldown = parseValue(weapon["쿨타임"]);
-        const mana = parseValue(weapon["마나"]);
-        const grade = weapon["등급"];
-
-        const totalDamage =
-          damage !== null && hits !== null ? damage * hits : 0;
-
-        const effectiveCooldown =
-          cooldown > 0 ? cooldown * cooldownMultiplier : 0;
-
-        const dps =
-          totalDamage > 0 && effectiveCooldown > 0
-            ? totalDamage / effectiveCooldown
-            : 0;
-        const mps =
-          mana > 0 && effectiveCooldown > 0 ? mana / effectiveCooldown : 0;
-        return { dps, mps, grade };
-      };
-
+    if (dpsState.specialWeapons) {
       const uniqueItems = {};
       dpsState.specialWeapons.forEach((item) => {
         if (!item.name) return;
@@ -97,8 +61,49 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
         }
       });
 
+      const parseValue = (str) => {
+        if (str === null || str === undefined) return null;
+        if (typeof str === "number") return str;
+        const num = parseFloat(str);
+        return isNaN(num) ? null : num;
+      };
+
       Object.values(uniqueItems).forEach((item) => {
-        const { dps, mps, grade } = calculateWeaponStats(item.name, item.enh);
+        let { damage, hits, cooldown, mana, grade } = item;
+
+        // Backward compatibility
+        if (
+          (damage === undefined || damage === null) &&
+          Object.keys(processedWeaponData).length > 0
+        ) {
+          const weaponData = processedWeaponData[item.name];
+          const weapon = weaponData?.byEnhancement[item.enh];
+          if (weapon) {
+            damage = weapon["피해량"];
+            hits = weapon["타수"];
+            cooldown = weapon["쿨타임"];
+            mana = weapon["마나"];
+            grade = weapon["등급"];
+          }
+        }
+
+        const numDamage = parseValue(damage);
+        const numHits = parseValue(hits);
+        const numCooldown = parseValue(cooldown);
+        const numMana = parseValue(mana);
+
+        const totalDamage =
+          numDamage !== null && numHits !== null ? numDamage * numHits : 0;
+
+        const effectiveCooldown =
+          numCooldown > 0 ? numCooldown * cooldownMultiplier : 0;
+
+        const dps =
+          totalDamage > 0 && effectiveCooldown > 0
+            ? totalDamage / effectiveCooldown
+            : 0;
+        const mps =
+          numMana > 0 && effectiveCooldown > 0 ? numMana / effectiveCooldown : 0;
 
         let weaponDamageMultiplier = 1 + acc.specialWeaponDamagePercent / 100;
 

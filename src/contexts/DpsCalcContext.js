@@ -45,7 +45,9 @@ export const DpsCalcProvider = ({ children }) => {
   }, []); // <-- 빈 의존성 배열
 
   return (
-    <DpsCalcContext.Provider value={{ dpsState, updateDpsState }}>
+    <DpsCalcContext.Provider
+      value={{ dpsState, setDpsState, updateDpsState }}
+    >
       {children}
     </DpsCalcContext.Provider>
   );
