@@ -103,6 +103,55 @@ const DivineShard = () => {
     });
   };
 
+  const handleSliderChange = (shardId, statIndex, newValue) => {
+    const shardInfo = SHARDS.find((s) => s.id === shardId);
+    const shardState = dpsState.divineShard[shardId];
+    const statInfo = SHARED_STAT_INFO[statIndex];
+    const currentStatLevel = shardState.stats[statIndex];
+
+    if (newValue === currentStatLevel) return;
+
+    const totalPoints = shardState.level * shardInfo.pointsPerLevel;
+    const usedPoints = calculateUsedPoints(shardState.stats);
+    const remainingPoints = totalPoints - usedPoints;
+
+    let finalLevel = newValue;
+
+    if (newValue > currentStatLevel) {
+      let cost = 0;
+      for (let i = currentStatLevel + 1; i <= newValue; i++) {
+        cost += statInfo.reqPoints[i] || 0;
+      }
+
+      if (cost > remainingPoints) {
+        let affordableCost = 0;
+        finalLevel = currentStatLevel;
+        for (let i = currentStatLevel + 1; i <= newValue; i++) {
+          const levelCost = statInfo.reqPoints[i] || 0;
+          if (affordableCost + levelCost <= remainingPoints) {
+            affordableCost += levelCost;
+            finalLevel = i;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    if (finalLevel !== currentStatLevel) {
+      const newStats = [...shardState.stats];
+      newStats[statIndex] = finalLevel;
+
+      updateDpsState("divineShard", {
+        ...dpsState.divineShard,
+        [shardId]: {
+          ...shardState,
+          stats: newStats,
+        },
+      });
+    }
+  };
+
   return (
     <Box sx={styles.container}>
       <Box
@@ -217,7 +266,9 @@ const DivineShard = () => {
                           value={stats[index]}
                           min={0}
                           max={shard.maxStatLevel}
-                          disabled
+                          onChange={(e, val) =>
+                            handleSliderChange(shard.id, index, val)
+                          }
                           size="small"
                         />
                       </Box>

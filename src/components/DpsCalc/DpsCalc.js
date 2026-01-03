@@ -5,7 +5,6 @@ import {
   Card,
   CardActionArea,
   CardContent,
-  Button,
   Paper,
   Divider,
 } from "@mui/material";
@@ -37,9 +36,9 @@ const DpsCalc = () => {
   const { cache } = useContext(CacheContext);
   const { weapons: allWeaponsData } = cache;
 
-  const handleStateCheck = () => {
-    console.log("DPS Calc State:", dpsState);
-  };
+  // const handleStateCheck = () => {
+  //   console.log("DPS Calc State:", dpsState);
+  // };
 
   // 특수 무기 데이터를 계산에 용이하도록 가공
   const processedWeaponData = useMemo(() => {
