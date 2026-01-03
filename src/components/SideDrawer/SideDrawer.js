@@ -20,12 +20,12 @@ import * as styles from "./SideDrawer.styles";
 import { ThemeContext } from "../../contexts/ThemeContext";
 
 const menuItems = [
-  { text: "Home", icon: <HomeIcon />, path: "/" },
+  { text: "홈", icon: <HomeIcon />, path: "/" },
   // { text: "Sheet Data", icon: <ArticleIcon />, path: "/sheet" },
-  { text: "Enh_Sim", icon: <CalculateIcon />, path: "/enh_sim" },
-  { text: "Weapons", icon: <HardwareIcon />, path: "/weapons" },
-  { text: "Class", icon: <ArticleIcon />, path: "/class" },
-  { text: "DPS Calc", icon: <SpeedIcon />, path: "/dps_calc" },
+  { text: "특수 무기", icon: <HardwareIcon />, path: "/weapons" },
+  { text: "직업 무기", icon: <ArticleIcon />, path: "/class" },
+  { text: "강화 시뮬레이터", icon: <CalculateIcon />, path: "/enh_sim" },
+  { text: "DPS 계산기", icon: <SpeedIcon />, path: "/dps_calc" },
 ];
 
 export default function SideDrawer({ open, onClose, onMenuItemClick }) {
