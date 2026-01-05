@@ -245,7 +245,9 @@ const DivineShard = () => {
                               ? `${effect.name} `
                               : ""}
                             {(effect.values[stats[index]] || 0).toFixed(
-                              effect.unit === "%" ? 1 : 0
+                              Number.isInteger(effect.values[stats[index]] || 0)
+                                ? 0
+                                : 2
                             )}
                             {effect.unit}
                           </React.Fragment>
