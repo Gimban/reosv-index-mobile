@@ -41,7 +41,7 @@ const SHEET_URL_2 = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/expor
 const images = require.context(
   "../../../assets/images/accessories",
   false,
-  /\.(png|jpe?g|svg|webp)$/
+  /\.(png|jpe?g|svg|webp)$/,
 );
 
 const accessoryImages = images.keys().reduce((acc, item) => {
@@ -75,6 +75,7 @@ const VALID_DPS_OPTIONS = new Set([
   "전설 등급 무기 데미지 증가 %",
   "전설&필멸 등급 무기 데미지 증가 %",
   "필멸 등급 무기 데미지 증가 %",
+  "신화 등급 무기 데미지 증가 %",
   "운명 등급 무기 데미지 증가 %",
   "최대 마나 증가 +",
   "최대 마나 증가 %",
@@ -102,14 +103,14 @@ const Accessory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedItems, setSelectedItems] = useState(
-    dpsState.accessories?.selectedItems || {}
+    dpsState.accessories?.selectedItems || {},
   );
   const [accessoryOptions, setAccessoryOptions] = useState(
-    dpsState.accessories?.accessoryOptions || {}
+    dpsState.accessories?.accessoryOptions || {},
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [potentialState, setPotentialState] = useState(
-    dpsState.accessories?.potentialState || {}
+    dpsState.accessories?.potentialState || {},
   );
   const [activeSlot, setActiveSlot] = useState(null);
 
@@ -163,11 +164,11 @@ const Accessory = () => {
       )
         return 0;
       const row = cache.accessories.sheet2.find(
-        (r) => r["옵션"] === optionName
+        (r) => r["옵션"] === optionName,
       );
       return row ? Number(row[grade]) || 0 : 0;
     },
-    [cache.accessories]
+    [cache.accessories],
   );
 
   const potentialOptionsList = useMemo(() => {
@@ -410,7 +411,7 @@ const Accessory = () => {
                             handleOptionChange(
                               slot.id,
                               optionName,
-                              e.target.value
+                              e.target.value,
                             )
                           }
                         />
@@ -450,7 +451,7 @@ const Accessory = () => {
                       const isDpsOption = VALID_DPS_OPTIONS.has(selectedOption);
                       const value = getPotentialValue(
                         selectedOption,
-                        potentialState[slot.id]?.grade
+                        potentialState[slot.id]?.grade,
                       );
 
                       return (
@@ -472,7 +473,7 @@ const Accessory = () => {
                                 handlePotentialOptionChange(
                                   slot.id,
                                   index,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                               sx={

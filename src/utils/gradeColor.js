@@ -1,5 +1,7 @@
 export const getCardColorByGrade = (grade) => {
   switch (grade) {
+    case "신화":
+      return "#f700ffff"; // 분홍색 계열
     case "필멸":
       return "#d32f2f"; // 빨간색 계열
     case "전설":

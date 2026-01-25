@@ -41,15 +41,16 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
     cooldownReductionPercent: getStat("스킬 쿨타임 감소 %"),
     specialWeaponDamagePercent: getStat("특수 무기 데미지 증가 %"),
     commonAdvancedWeaponDamagePercent: getStat(
-      "일반&고급 등급 무기 데미지 증가 %"
+      "일반&고급 등급 무기 데미지 증가 %",
     ),
     rareWeaponDamagePercent: getStat("희귀 등급 무기 데미지 증가 %"),
     heroicWeaponDamagePercent: getStat("영웅 등급 무기 데미지 증가 %"),
     legendaryWeaponDamagePercent: getStat("전설 등급 무기 데미지 증가 %"),
     legendaryMortalWeaponDamagePercent: getStat(
-      "전설&필멸 등급 무기 데미지 증가 %"
+      "전설&필멸 등급 무기 데미지 증가 %",
     ),
     mortalWeaponDamagePercent: getStat("필멸 등급 무기 데미지 증가 %"),
+    mythicWeaponDamagePercent: getStat("신화 등급 무기 데미지 증가 %"),
     destinyWeaponDamagePercent: getStat("운명 등급 무기 데미지 증가 %"),
     maxManaFlat: getStat("최대 마나 증가 +"),
     maxManaPercent: getStat("최대 마나 증가 %"),
@@ -312,11 +313,11 @@ const DpsCompare = () => {
 
   const statsA = useMemo(
     () => calculateFinalStats(slotA, processedWeaponData),
-    [slotA, processedWeaponData]
+    [slotA, processedWeaponData],
   );
   const statsB = useMemo(
     () => calculateFinalStats(slotB, processedWeaponData),
-    [slotB, processedWeaponData]
+    [slotB, processedWeaponData],
   );
 
   const handleFileUpload = (event, slotSetter) => {
