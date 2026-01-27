@@ -131,6 +131,9 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
         if (grade === "운명") {
           weaponDamageMultiplier += acc.destinyWeaponDamagePercent / 100;
         }
+        if (grade === "신화") {
+          weaponDamageMultiplier += acc.mythicWeaponDamagePercent / 100;
+        }
       }
       baseDps += dps * weaponDamageMultiplier;
       totalMps += mps;
