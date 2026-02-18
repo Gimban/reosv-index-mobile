@@ -41,6 +41,12 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       ),
       mortalWeaponDamagePercent: getStat("필멸 등급 무기 데미지 증가 %"),
       mythicWeaponDamagePercent: getStat("신화 등급 무기 데미지 증가 %"),
+      legendaryMythicWeaponDamagePercent: getStat(
+        "전설&신화 등급 무기 데미지 증가 %",
+      ),
+      mortalMythicWeaponDamagePercent: getStat(
+        "필멸&신화 등급 무기 데미지 증가 %",
+      ),
       destinyWeaponDamagePercent: getStat("운명 등급 무기 데미지 증가 %"),
       maxManaFlat: getStat("최대 마나 증가 +"),
       maxManaPercent: getStat("최대 마나 증가 %"),
@@ -125,17 +131,23 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
             weaponDamageMultiplier += acc.legendaryWeaponDamagePercent / 100;
             weaponDamageMultiplier +=
               acc.legendaryMortalWeaponDamagePercent / 100;
+            weaponDamageMultiplier +=
+              acc.legendaryMythicWeaponDamagePercent / 100;
           }
           if (grade === "필멸") {
             weaponDamageMultiplier += acc.mortalWeaponDamagePercent / 100;
             weaponDamageMultiplier +=
               acc.legendaryMortalWeaponDamagePercent / 100;
+            weaponDamageMultiplier += acc.mortalMythicWeaponDamagePercent / 100;
           }
           if (grade === "운명") {
             weaponDamageMultiplier += acc.destinyWeaponDamagePercent / 100;
           }
           if (grade === "신화") {
             weaponDamageMultiplier += acc.mythicWeaponDamagePercent / 100;
+            weaponDamageMultiplier +=
+              acc.legendaryMythicWeaponDamagePercent / 100;
+            weaponDamageMultiplier += acc.mortalMythicWeaponDamagePercent / 100;
           }
         }
 
