@@ -61,6 +61,16 @@ const Level = () => {
     return (parseInt(moveSpeed, 10) || 0) > totalPoints;
   }, [usedPoints, totalPoints, statType, moveSpeed]);
 
+  // 단일 스탯 100포인트 초과 여부 검사 (커스텀 모드)
+  const isStatLimitExceeded = useMemo(() => {
+    if (statType === "custom") {
+      const atk = parseInt(customAttack, 10) || 0;
+      const hp = parseInt(customHealth, 10) || 0;
+      return atk > 100 || hp > 100;
+    }
+    return false;
+  }, [statType, customAttack, customHealth]);
+
   // 최종 대미지 추가 수치 계산
   const finalDamageBonus = useMemo(() => {
     const ms = parseInt(moveSpeed, 10) || 0;
@@ -70,14 +80,18 @@ const Level = () => {
 
     if (statType === "attack") {
       const remaining = Math.max(0, totalPoints - ms);
-      bonus = remaining * 0.65;
+      const atk = Math.min(100, remaining);
+      const hp = Math.max(0, remaining - 100);
+      bonus = atk * 0.65 + Math.min(100, hp) * 0.4;
     } else if (statType === "health") {
       const remaining = Math.max(0, totalPoints - ms);
-      bonus = remaining * 0.4;
+      const hp = Math.min(100, remaining);
+      const atk = Math.max(0, remaining - 100);
+      bonus = Math.min(100, atk) * 0.65 + hp * 0.4;
     } else if (statType === "custom") {
       const atk = parseInt(customAttack, 10) || 0;
       const hp = parseInt(customHealth, 10) || 0;
-      bonus = atk * 0.65 + hp * 0.4;
+      bonus = Math.min(100, atk) * 0.65 + Math.min(100, hp) * 0.4;
     }
     return bonus;
   }, [
@@ -97,7 +111,7 @@ const Level = () => {
   const handleLevelChange = (e) => {
     const val = parseInt(e.target.value, 10);
     if (isNaN(val)) setLevel("");
-    else setLevel(Math.min(100, Math.max(1, val)));
+    else setLevel(Math.min(110, Math.max(1, val)));
   };
 
   const handleMoveSpeedChange = (e) => {
@@ -125,9 +139,9 @@ const Level = () => {
             type="number"
             value={level}
             onChange={handleLevelChange}
-            inputProps={{ min: 1, max: 100 }}
+            inputProps={{ min: 1, max: 110 }}
             fullWidth
-            helperText="1 ~ 100"
+            helperText="1 ~ 110"
           />
           <TextField
             label="이동속도 투자 포인트"
@@ -206,6 +220,11 @@ const Level = () => {
               size="small"
             />
           </Box>
+        )}
+        {isStatLimitExceeded && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            단일 스탯은 최대 100포인트까지만 적용됩니다.
+          </Alert>
         )}
       </Paper>
 

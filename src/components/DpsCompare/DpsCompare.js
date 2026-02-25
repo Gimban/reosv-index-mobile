@@ -174,12 +174,18 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
   if (!isOverLimit) {
     if (statType === "attack") {
       const remaining = Math.max(0, totalPoints - msPoints);
-      damageBonusFromStats = remaining * 0.65;
+      const atk = Math.min(100, remaining);
+      const hp = Math.max(0, remaining - 100);
+      damageBonusFromStats = atk * 0.65 + Math.min(100, hp) * 0.4;
     } else if (statType === "health") {
       const remaining = Math.max(0, totalPoints - msPoints);
-      damageBonusFromStats = remaining * 0.4;
+      const hp = Math.min(100, remaining);
+      const atk = Math.max(0, remaining - 100);
+      damageBonusFromStats = Math.min(100, atk) * 0.65 + hp * 0.4;
     } else if (statType === "custom") {
-      damageBonusFromStats = customAtkPoints * 0.65 + customHpPoints * 0.4;
+      damageBonusFromStats =
+        Math.min(100, customAtkPoints) * 0.65 +
+        Math.min(100, customHpPoints) * 0.4;
     }
   }
   damageBonusFromStats += acc.finalDamageStat * 0.65;
