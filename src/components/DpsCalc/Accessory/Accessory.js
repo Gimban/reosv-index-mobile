@@ -58,7 +58,7 @@ const ACCESSORY_SLOTS = [
   { id: "ring2", label: "반지 2", part: "반지" },
 ];
 
-const OPTION_TYPES = ["일반", "고급", "희귀", "영웅"];
+const OPTION_TYPES = ["일반", "고급", "희귀", "영웅", "전설"];
 const POTENTIAL_GRADES = ["없음", "일반", "고급", "희귀", "영웅"];
 const VALID_DPS_OPTIONS = new Set([
   "클래스 기본 공격 데미지 증가 +",
