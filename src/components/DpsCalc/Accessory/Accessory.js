@@ -97,6 +97,12 @@ const FIXED_OPTIONS = {
   },
 };
 
+const FOUR_POTENTIAL_OPTIONS_ACCESSORIES = new Set([
+  "월광의 클로토",
+  "초월의 라케시스",
+  "전율의 아트로포스",
+]);
+
 const Accessory = () => {
   const navigate = useNavigate();
   const { dpsState, updateDpsState } = useDpsCalc();
@@ -193,13 +199,18 @@ const Accessory = () => {
     });
 
     // 2. 잠재 옵션
-    Object.values(potentialState).forEach((slotPotential) => {
+    Object.entries(potentialState).forEach(([slotId, slotPotential]) => {
       if (
         slotPotential &&
         slotPotential.grade !== "없음" &&
         slotPotential.options
       ) {
-        slotPotential.options.forEach((optionName) => {
+        const item = selectedItems[slotId];
+        const isFourOptions =
+          item && FOUR_POTENTIAL_OPTIONS_ACCESSORIES.has(item["보석"]);
+        const limit = isFourOptions ? 4 : 3;
+
+        slotPotential.options.slice(0, limit).forEach((optionName) => {
           if (optionName && VALID_DPS_OPTIONS.has(optionName)) {
             const value = getPotentialValue(optionName, slotPotential.grade);
             totals[optionName] = (totals[optionName] || 0) + value;
@@ -216,7 +227,7 @@ const Accessory = () => {
     });
 
     return finalTotals;
-  }, [accessoryOptions, potentialState, getPotentialValue]);
+  }, [accessoryOptions, potentialState, getPotentialValue, selectedItems]);
 
   // 상태 변경 시 자동으로 전역 상태 업데이트
   useEffect(() => {
@@ -235,21 +246,35 @@ const Accessory = () => {
   ]);
 
   const handlePotentialGradeChange = (slotId, grade) => {
+    const item = selectedItems[slotId];
+    const isFourOptions =
+      item && FOUR_POTENTIAL_OPTIONS_ACCESSORIES.has(item["보석"]);
+    const defaultOptions = isFourOptions
+      ? [null, null, null, null]
+      : [null, null, null];
+
     setPotentialState((prev) => ({
       ...prev,
       [slotId]: {
         grade,
         options:
           grade === "없음"
-            ? [null, null, null]
-            : prev[slotId]?.options || [null, null, null],
+            ? defaultOptions
+            : prev[slotId]?.options || defaultOptions,
       },
     }));
   };
 
   const handlePotentialOptionChange = (slotId, index, optionName) => {
     setPotentialState((prev) => {
-      const currentOptions = [...(prev[slotId]?.options || [null, null, null])];
+      const item = selectedItems[slotId];
+      const isFourOptions =
+        item && FOUR_POTENTIAL_OPTIONS_ACCESSORIES.has(item["보석"]);
+      const defaultOptions = isFourOptions
+        ? [null, null, null, null]
+        : [null, null, null];
+
+      const currentOptions = [...(prev[slotId]?.options || defaultOptions)];
       currentOptions[index] = optionName;
       return {
         ...prev,
@@ -447,7 +472,11 @@ const Accessory = () => {
 
                   {potentialState[slot.id]?.grade &&
                     potentialState[slot.id].grade !== "없음" &&
-                    [0, 1, 2].map((index) => {
+                    (selectedItem &&
+                    FOUR_POTENTIAL_OPTIONS_ACCESSORIES.has(selectedItem["보석"])
+                      ? [0, 1, 2, 3]
+                      : [0, 1, 2]
+                    ).map((index) => {
                       const selectedOption =
                         potentialState[slot.id]?.options?.[index] || "";
                       const isDpsOption = VALID_DPS_OPTIONS.has(selectedOption);
