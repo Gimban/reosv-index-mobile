@@ -84,7 +84,7 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
     };
 
     Object.values(uniqueItems).forEach((item) => {
-      let { damage, hits, cooldown, mana, grade } = item;
+      let { damage, hits, cooldown, mana, grade, breakthrough } = item;
       if (
         (damage === undefined || damage === null) &&
         Object.keys(processedWeaponData).length > 0
@@ -103,8 +103,11 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
       const numHits = parseValue(hits);
       const numCooldown = parseValue(cooldown);
       const numMana = parseValue(mana);
+      const breakthroughMultiplier = 1 + (breakthrough || 0) * 0.2;
       const totalDamage =
-        numDamage !== null && numHits !== null ? numDamage * numHits : 0;
+        numDamage !== null && numHits !== null
+          ? numDamage * numHits * breakthroughMultiplier
+          : 0;
       const effectiveCooldown =
         numCooldown > 0 ? numCooldown * cooldownMultiplier : 0;
       const dps =
@@ -135,8 +138,7 @@ const calculateFinalStats = (dpsState, processedWeaponData) => {
           weaponDamageMultiplier += acc.mortalWeaponDamagePercent / 100;
           weaponDamageMultiplier +=
             acc.legendaryMortalWeaponDamagePercent / 100;
-          weaponDamageMultiplier +=
-            acc.mortalMythicWeaponDamagePercentWeaponDamagePercent / 100;
+          weaponDamageMultiplier += acc.mortalMythicWeaponDamagePercent / 100;
         }
         if (grade === "운명") {
           weaponDamageMultiplier += acc.destinyWeaponDamagePercent / 100;

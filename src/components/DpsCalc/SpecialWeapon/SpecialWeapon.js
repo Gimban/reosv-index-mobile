@@ -48,6 +48,20 @@ const excludedGrades = new Set([]);
 let idCounter = 0;
 const MAX_ITEMS = 20;
 
+const getMaxBreakthrough = (grade) => {
+  switch (grade) {
+    case "영웅":
+      return 3;
+    case "전설":
+      return 5;
+    case "필멸":
+    case "신화":
+      return 7;
+    default:
+      return 0;
+  }
+};
+
 const SpecialWeaponItem = React.memo(
   ({
     item,
@@ -61,13 +75,18 @@ const SpecialWeaponItem = React.memo(
     isRemoveDisabled,
   }) => {
     const { dps, mps } = useMemo(
-      () => calculateStats(item.name, item.enh),
-      [item.name, item.enh, calculateStats]
+      () => calculateStats(item.name, item.enh, item.breakthrough),
+      [item.name, item.enh, item.breakthrough, calculateStats],
     );
 
     const enhancements = useMemo(
       () => getEnhancementsForWeapon(item.name),
-      [item.name, getEnhancementsForWeapon]
+      [item.name, getEnhancementsForWeapon],
+    );
+
+    const maxBreakthrough = useMemo(
+      () => getMaxBreakthrough(item.grade),
+      [item.grade],
     );
 
     return (
@@ -89,7 +108,11 @@ const SpecialWeaponItem = React.memo(
               flexDirection: { xs: "column", sm: "row" },
             }}
           >
-            <FormControl sx={{ width: { xs: "100%", sm: "70%" } }}>
+            <FormControl
+              sx={{
+                width: { xs: "100%", sm: maxBreakthrough > 0 ? "50%" : "70%" },
+              }}
+            >
               <Button
                 variant="outlined"
                 onClick={() => onOpenModal(item.id)}
@@ -99,7 +122,9 @@ const SpecialWeaponItem = React.memo(
               </Button>
             </FormControl>
             <FormControl
-              sx={{ width: { xs: "100%", sm: "30%" } }}
+              sx={{
+                width: { xs: "100%", sm: maxBreakthrough > 0 ? "25%" : "30%" },
+              }}
               disabled={!item.name}
             >
               <InputLabel>강화 차수</InputLabel>
@@ -115,6 +140,27 @@ const SpecialWeaponItem = React.memo(
                 ))}
               </Select>
             </FormControl>
+            {maxBreakthrough > 0 && (
+              <FormControl
+                sx={{ width: { xs: "100%", sm: "25%" } }}
+                disabled={!item.name}
+              >
+                <InputLabel>돌파</InputLabel>
+                <Select
+                  value={item.breakthrough || 0}
+                  label="돌파"
+                  onChange={(e) =>
+                    onChange(item.id, "breakthrough", e.target.value)
+                  }
+                >
+                  {[...Array(maxBreakthrough + 1).keys()].map((level) => (
+                    <MenuItem key={level} value={level}>
+                      {level}단계
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
           </Box>
           {isDuplicate && (
             <Typography color="error" variant="caption" sx={{ mt: 1 }}>
@@ -128,7 +174,7 @@ const SpecialWeaponItem = React.memo(
         </Paper>
       </Grid>
     );
-  }
+  },
 );
 
 const SpecialWeapon = () => {
@@ -152,6 +198,7 @@ const SpecialWeapon = () => {
         id: idCounter++,
         name: "",
         enh: 0,
+        breakthrough: 0,
         damage: null,
         hits: null,
         cooldown: null,
@@ -184,7 +231,7 @@ const SpecialWeapon = () => {
           skipEmptyLines: true,
           complete: (results) => {
             const parsedData = results.data.filter(
-              (row) => row["이름"] && row["이름"].trim() !== ""
+              (row) => row["이름"] && row["이름"].trim() !== "",
             );
             setCacheValue("weapons", parsedData);
             setLoading(false);
@@ -236,11 +283,11 @@ const SpecialWeapon = () => {
       if (!processedWeaponData[weaponName]) return [];
       return processedWeaponData[weaponName].enhancements;
     },
-    [processedWeaponData]
+    [processedWeaponData],
   );
 
   const calculateStats = useCallback(
-    (weaponName, enhancement) => {
+    (weaponName, enhancement, breakthrough = 0) => {
       const weaponData = processedWeaponData[weaponName];
       if (!weaponData) {
         return { dps: 0, mps: 0 };
@@ -263,13 +310,17 @@ const SpecialWeapon = () => {
       const cooldown = parseValue(weapon["쿨타임"]);
       const mana = parseValue(weapon["마나"]);
 
-      const totalDamage = damage !== null && hits !== null ? damage * hits : 0;
+      const breakthroughMultiplier = 1 + (breakthrough || 0) * 0.2;
+      const totalDamage =
+        damage !== null && hits !== null
+          ? damage * hits * breakthroughMultiplier
+          : 0;
       const dps = totalDamage > 0 && cooldown > 0 ? totalDamage / cooldown : 0;
       const mps = mana > 0 && cooldown > 0 ? mana / cooldown : 0;
 
       return { dps, mps };
     },
-    [processedWeaponData]
+    [processedWeaponData],
   );
 
   const handleItemChange = useCallback(
@@ -290,6 +341,7 @@ const SpecialWeapon = () => {
                   ? weaponData.enhancements[0]
                   : 0;
               updatedItem.enh = enhancement;
+              updatedItem.breakthrough = 0; // Reset breakthrough on weapon change
             }
 
             const weaponData = processedWeaponData[weaponName];
@@ -312,10 +364,10 @@ const SpecialWeapon = () => {
             return updatedItem;
           }
           return item;
-        })
+        }),
       );
     },
-    [processedWeaponData]
+    [processedWeaponData],
   );
 
   const handleAddItem = useCallback(() => {
@@ -327,6 +379,7 @@ const SpecialWeapon = () => {
             id: idCounter++,
             name: "",
             enh: 0,
+            breakthrough: 0,
             damage: null,
             hits: null,
             cooldown: null,
@@ -360,7 +413,7 @@ const SpecialWeapon = () => {
       }
       handleCloseModal();
     },
-    [activeItemId, handleItemChange, handleCloseModal]
+    [activeItemId, handleItemChange, handleCloseModal],
   );
 
   const handleConfirm = () => {
@@ -391,12 +444,16 @@ const SpecialWeapon = () => {
 
     return finalItems.reduce(
       (acc, item) => {
-        const { dps, mps } = calculateStats(item.name, item.enh);
+        const { dps, mps } = calculateStats(
+          item.name,
+          item.enh,
+          item.breakthrough,
+        );
         acc.totalDps += dps;
         acc.totalMps += mps;
         return acc;
       },
-      { totalDps: 0, totalMps: 0 }
+      { totalDps: 0, totalMps: 0 },
     );
   }, [items, calculateStats]);
 

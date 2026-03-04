@@ -76,7 +76,7 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       };
 
       Object.values(uniqueItems).forEach((item) => {
-        let { damage, hits, cooldown, mana, grade } = item;
+        let { damage, hits, cooldown, mana, grade, breakthrough } = item;
 
         // Backward compatibility
         if (
@@ -99,8 +99,11 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
         const numCooldown = parseValue(cooldown);
         const numMana = parseValue(mana);
 
+        const breakthroughMultiplier = 1 + (breakthrough || 0) * 0.2;
         const totalDamage =
-          numDamage !== null && numHits !== null ? numDamage * numHits : 0;
+          numDamage !== null && numHits !== null
+            ? numDamage * numHits * breakthroughMultiplier
+            : 0;
 
         const effectiveCooldown =
           numCooldown > 0 ? numCooldown * cooldownMultiplier : 0;
