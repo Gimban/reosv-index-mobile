@@ -33,9 +33,11 @@ const BASE_URL_ID = "1IZra9ZZRwBBgT4ai1W0fCATeFFsztHnF0k03DmLr1tI";
 // TODO: 실제 장신구 데이터 시트의 GID로 변경해야 합니다.
 const GID_1 = "1577464411"; // 장신구 기본 옵션
 const GID_2 = "2032806807"; // 장신구 잠재 옵션
+const GID_3 = "889989336"; // 디멘션 장신구 기본 옵션
 
 const SHEET_URL_1 = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID_1}`;
 const SHEET_URL_2 = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID_2}`;
+const SHEET_URL_3 = `https://docs.google.com/spreadsheets/d/${BASE_URL_ID}/export?format=csv&gid=${GID_3}`;
 
 // 장신구 이미지 로드
 const images = require.context(
@@ -97,6 +99,13 @@ const FIXED_OPTIONS = {
   },
 };
 
+const DIMENSION_ACCESSORIES = new Set([
+  "디멘션 팬던트",
+  "디멘션 귀걸이",
+  "디멘션 반지",
+  "디멘션",
+]);
+
 const FOUR_POTENTIAL_OPTIONS_ACCESSORIES = new Set([
   "월광의 클로토",
   "초월의 라케시스",
@@ -116,6 +125,9 @@ const Accessory = () => {
   const [accessoryOptions, setAccessoryOptions] = useState(
     dpsState.accessories?.accessoryOptions || {},
   );
+  const [dimensionOptions, setDimensionOptions] = useState(
+    dpsState.accessories?.dimensionOptions || {},
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [potentialState, setPotentialState] = useState(
     dpsState.accessories?.potentialState || {},
@@ -132,25 +144,32 @@ const Accessory = () => {
 
       setLoading(true);
       try {
-        // 2개의 시트 데이터를 병렬로 요청
-        const [response1, response2] = await Promise.all([
+        // 3개의 시트 데이터를 병렬로 요청
+        const [response1, response2, response3] = await Promise.all([
           fetch(SHEET_URL_1),
           fetch(SHEET_URL_2),
+          fetch(SHEET_URL_3),
         ]);
 
-        if (!response1.ok || !response2.ok) {
+        if (!response1.ok || !response2.ok || !response3.ok) {
           throw new Error("데이터를 불러오는데 실패했습니다.");
         }
 
         const text1 = await response1.text();
         const text2 = await response2.text();
+        const text3 = await response3.text();
 
         const parseOptions = { header: true, skipEmptyLines: true };
         const data1 = Papa.parse(text1, parseOptions).data;
         const data2 = Papa.parse(text2, parseOptions).data;
+        const data3 = Papa.parse(text3, parseOptions).data;
 
-        // 캐시에 저장 (두 시트의 데이터를 객체로 묶어서 저장)
-        setCacheValue("accessories", { sheet1: data1, sheet2: data2 });
+        // 캐시에 저장 (세 시트의 데이터를 객체로 묶어서 저장)
+        setCacheValue("accessories", {
+          sheet1: data1,
+          sheet2: data2,
+          sheet3: data3,
+        });
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -182,6 +201,13 @@ const Accessory = () => {
   const potentialOptionsList = useMemo(() => {
     if (!cache.accessories?.sheet2) return [];
     return cache.accessories.sheet2
+      .map((row) => row["옵션"])
+      .filter((opt) => opt && opt.trim() !== "");
+  }, [cache.accessories]);
+
+  const dimensionOptionsList = useMemo(() => {
+    if (!cache.accessories?.sheet3) return [];
+    return cache.accessories.sheet3
       .map((row) => row["옵션"])
       .filter((opt) => opt && opt.trim() !== "");
   }, [cache.accessories]);
@@ -235,12 +261,14 @@ const Accessory = () => {
       selectedItems,
       accessoryOptions,
       potentialState,
+      dimensionOptions,
       totalStats,
     });
   }, [
     selectedItems,
     accessoryOptions,
     potentialState,
+    dimensionOptions,
     totalStats,
     updateDpsState,
   ]);
@@ -286,6 +314,31 @@ const Accessory = () => {
     });
   };
 
+  const handleDimensionOptionChange = (slotId, index, optionName) => {
+    const oldOptionName = dimensionOptions[slotId]?.[index];
+    if (oldOptionName && oldOptionName !== optionName) {
+      setAccessoryOptions((prev) => {
+        const newOptions = { ...prev };
+        if (newOptions[slotId]) {
+          const slotOpts = { ...newOptions[slotId] };
+          delete slotOpts[oldOptionName];
+          newOptions[slotId] = slotOpts;
+        }
+        return newOptions;
+      });
+    }
+    setDimensionOptions((prev) => {
+      const newOptions = { ...prev };
+      const currentSlotOptions = prev[slotId]
+        ? [...prev[slotId]]
+        : Array(4).fill(null);
+
+      currentSlotOptions[index] = optionName === "" ? null : optionName;
+      newOptions[slotId] = currentSlotOptions;
+      return newOptions;
+    });
+  };
+
   const handleSlotClick = (slot) => {
     setActiveSlot(slot);
     setIsModalOpen(true);
@@ -311,6 +364,11 @@ const Accessory = () => {
         delete newOptions[slotId];
         // 잠재 옵션도 삭제
         setPotentialState((prev) => {
+          const newState = { ...prev };
+          delete newState[slotId];
+          return newState;
+        });
+        setDimensionOptions((prev) => {
           const newState = { ...prev };
           delete newState[slotId];
           return newState;
@@ -378,6 +436,8 @@ const Accessory = () => {
       <Box sx={styles.slotsContainer}>
         {ACCESSORY_SLOTS.map((slot) => {
           const selectedItem = selectedItems[slot.id];
+          const isDimensionItem =
+            selectedItem && DIMENSION_ACCESSORIES.has(selectedItem["보석"]);
           return (
             <Paper key={slot.id} sx={styles.slotItem} elevation={2}>
               <Box sx={styles.slotHeader} onClick={() => handleSlotClick(slot)}>
@@ -406,45 +466,154 @@ const Accessory = () => {
               {selectedItem && (
                 <Box sx={styles.optionsContainer}>
                   <Divider />
-                  {OPTION_TYPES.map((optionGrade) => {
-                    const optionName = selectedItem[`${optionGrade} 옵션`];
-                    if (!optionName) return null;
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ mb: 1, fontWeight: "bold" }}
+                  >
+                    기본 옵션
+                  </Typography>
+                  {isDimensionItem
+                    ? Array.from({ length: 4 }).map((_, index) => {
+                        const selectedOption =
+                          dimensionOptions[slot.id]?.[index] || "";
+                        const isDpsOption =
+                          VALID_DPS_OPTIONS.has(selectedOption);
+                        return (
+                          <Box
+                            key={index}
+                            sx={{
+                              display: "flex",
+                              gap: 1,
+                              mb: 1,
+                              alignItems: "center",
+                            }}
+                          >
+                            <FormControl fullWidth size="small">
+                              <InputLabel>기본 옵션 {index + 1}</InputLabel>
+                              <Select
+                                value={selectedOption}
+                                label={`기본 옵션 ${index + 1}`}
+                                onChange={(e) =>
+                                  handleDimensionOptionChange(
+                                    slot.id,
+                                    index,
+                                    e.target.value,
+                                  )
+                                }
+                                sx={
+                                  isDpsOption
+                                    ? {
+                                        color: "primary.main",
+                                        fontWeight: "bold",
+                                        "& .MuiSelect-select": {
+                                          color: "primary.main",
+                                          fontWeight: "bold",
+                                        },
+                                      }
+                                    : {}
+                                }
+                              >
+                                <MenuItem value="">
+                                  <em>선택 안 함</em>
+                                </MenuItem>
+                                {dimensionOptionsList.map((opt) => (
+                                  <MenuItem
+                                    key={opt}
+                                    value={opt}
+                                    sx={
+                                      VALID_DPS_OPTIONS.has(opt)
+                                        ? {
+                                            color: "primary.main",
+                                            fontWeight: "bold",
+                                          }
+                                        : {}
+                                    }
+                                  >
+                                    {opt}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                            <TextField
+                              type="number"
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                width: "80px",
+                                "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                                  {
+                                    display: "none",
+                                  },
+                                "& input[type=number]": {
+                                  MozAppearance: "textfield",
+                                },
+                              }}
+                              disabled={!selectedOption}
+                              value={
+                                accessoryOptions[slot.id]?.[selectedOption] ??
+                                ""
+                              }
+                              onChange={(e) =>
+                                handleOptionChange(
+                                  slot.id,
+                                  selectedOption,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </Box>
+                        );
+                      })
+                    : OPTION_TYPES.map((optionGrade) => {
+                        const optionName = selectedItem[`${optionGrade} 옵션`];
+                        if (!optionName) return null;
 
-                    const isDpsOption = VALID_DPS_OPTIONS.has(optionName);
-                    const isFixed =
-                      FIXED_OPTIONS[selectedItem["보석"]]?.[optionName] !==
-                      undefined;
+                        const isDpsOption = VALID_DPS_OPTIONS.has(optionName);
+                        const isFixed =
+                          FIXED_OPTIONS[selectedItem["보석"]]?.[optionName] !==
+                          undefined;
 
-                    return (
-                      <Box key={optionGrade} sx={styles.optionRow}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            ...(isDpsOption ? styles.dpsOptionLabel : {}),
-                            flex: 1,
-                            mr: 1,
-                          }}
-                        >
-                          {optionName}
-                        </Typography>
-                        <TextField
-                          type="number"
-                          size="small"
-                          variant="outlined"
-                          sx={{ width: "80px" }}
-                          disabled={isFixed}
-                          value={accessoryOptions[slot.id]?.[optionName] ?? ""}
-                          onChange={(e) =>
-                            handleOptionChange(
-                              slot.id,
-                              optionName,
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </Box>
-                    );
-                  })}
+                        return (
+                          <Box key={optionGrade} sx={styles.optionRow}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                ...(isDpsOption ? styles.dpsOptionLabel : {}),
+                                flex: 1,
+                                mr: 1,
+                              }}
+                            >
+                              {optionName}
+                            </Typography>
+                            <TextField
+                              type="number"
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                width: "80px",
+                                "& input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button":
+                                  {
+                                    display: "none",
+                                  },
+                                "& input[type=number]": {
+                                  MozAppearance: "textfield",
+                                },
+                              }}
+                              disabled={isFixed}
+                              value={
+                                accessoryOptions[slot.id]?.[optionName] ?? ""
+                              }
+                              onChange={(e) =>
+                                handleOptionChange(
+                                  slot.id,
+                                  optionName,
+                                  e.target.value,
+                                )
+                              }
+                            />
+                          </Box>
+                        );
+                      })}
 
                   <Divider sx={{ my: 1.5 }} />
                   <Typography
