@@ -216,12 +216,31 @@ const Accessory = () => {
     const totals = {};
 
     // 1. 기본 및 추가 옵션
-    Object.values(accessoryOptions).forEach((itemOptions) => {
-      Object.entries(itemOptions).forEach(([optionName, value]) => {
-        if (VALID_DPS_OPTIONS.has(optionName)) {
-          totals[optionName] = (totals[optionName] || 0) + (Number(value) || 0);
-        }
-      });
+    Object.entries(accessoryOptions).forEach(([slotId, itemOptions]) => {
+      const item = selectedItems[slotId];
+      if (!item) return;
+
+      const isDimension = DIMENSION_ACCESSORIES.has(item["보석"]);
+
+      if (isDimension) {
+        const dimOpts = dimensionOptions[slotId] || [];
+        dimOpts.forEach((optionName, index) => {
+          if (optionName && VALID_DPS_OPTIONS.has(optionName)) {
+            const value = itemOptions[`dim_${index}`];
+            if (value) {
+              totals[optionName] =
+                (totals[optionName] || 0) + (Number(value) || 0);
+            }
+          }
+        });
+      } else {
+        Object.entries(itemOptions).forEach(([optionName, value]) => {
+          if (VALID_DPS_OPTIONS.has(optionName)) {
+            totals[optionName] =
+              (totals[optionName] || 0) + (Number(value) || 0);
+          }
+        });
+      }
     });
 
     // 2. 잠재 옵션
@@ -253,7 +272,13 @@ const Accessory = () => {
     });
 
     return finalTotals;
-  }, [accessoryOptions, potentialState, getPotentialValue, selectedItems]);
+  }, [
+    accessoryOptions,
+    potentialState,
+    getPotentialValue,
+    selectedItems,
+    dimensionOptions,
+  ]);
 
   // 상태 변경 시 자동으로 전역 상태 업데이트
   useEffect(() => {
@@ -316,12 +341,12 @@ const Accessory = () => {
 
   const handleDimensionOptionChange = (slotId, index, optionName) => {
     const oldOptionName = dimensionOptions[slotId]?.[index];
-    if (oldOptionName && oldOptionName !== optionName) {
+    if (oldOptionName !== optionName) {
       setAccessoryOptions((prev) => {
         const newOptions = { ...prev };
         if (newOptions[slotId]) {
           const slotOpts = { ...newOptions[slotId] };
-          delete slotOpts[oldOptionName];
+          delete slotOpts[`dim_${index}`];
           newOptions[slotId] = slotOpts;
         }
         return newOptions;
@@ -550,13 +575,13 @@ const Accessory = () => {
                               }}
                               disabled={!selectedOption}
                               value={
-                                accessoryOptions[slot.id]?.[selectedOption] ??
+                                accessoryOptions[slot.id]?.[`dim_${index}`] ??
                                 ""
                               }
                               onChange={(e) =>
                                 handleOptionChange(
                                   slot.id,
-                                  selectedOption,
+                                  `dim_${index}`,
                                   e.target.value,
                                 )
                               }
