@@ -1,0 +1,16 @@
+[
+  {
+    "name": "파괴자",
+    "stat": "str",
+    "tiers": [
+      {
+        "threshold": 10,
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 2 }]
+      },
+      {
+        "threshold": 20,
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 3 }]
+      }
+    ]
+  }
+]

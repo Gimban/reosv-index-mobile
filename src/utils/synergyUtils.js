@@ -25,28 +25,22 @@ export const calculateSynergies = (stats, definitions) => {
 
   // 1. 단일 스탯 시너지 (계단식 누적형)
   // 예: 힘 10 달성 시 +2, 20 달성 시 +4가 추가되어 총 +6
-  single.forEach(({ stat, bonus, tiers = [] }) => {
+  single.forEach(({ stat, tiers = [] }) => {
     const statVal = stats[stat] || 0;
-    let totalTierBonus = 0;
-    // tiers 배열은 threshold 오름차순으로 정렬되어 있다고 가정합니다.
-    tiers.forEach(({ threshold, value }) => {
+    tiers.forEach(({ threshold, effects = [] }) => {
       if (statVal >= threshold) {
-        totalTierBonus += value;
+        effects.forEach(({ key, value }) => add(key, value));
       }
     });
-    if (totalTierBonus > 0) add(bonus.key, totalTierBonus);
   });
 
   // 2. 다중 스탯 시너지 (계단식 누적형)
-  [...dual, ...triple].forEach(({ bonus, tiers = [] }) => {
-    let totalTierBonus = 0;
-    // tiers 배열은 req의 스탯 요구치가 오름차순으로 정렬되어 있다고 가정합니다.
-    tiers.forEach(({ req, value }) => {
+  [...dual, ...triple].forEach(({ tiers = [] }) => {
+    tiers.forEach(({ req, effects = [] }) => {
       if (checkRequirements(stats, req)) {
-        totalTierBonus += value;
+        effects.forEach(({ key, value }) => add(key, value));
       }
     });
-    if (totalTierBonus > 0) add(bonus.key, totalTierBonus);
   });
 
   return totals;
