@@ -1,0 +1,200 @@
+[
+  {
+    "name": "파괴자",
+    "stat": "str",
+    "tiers": [
+      {
+        "threshold": 10,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 2 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 20,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 2 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 30,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 4 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 40,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 4 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 50,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 4 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 60,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 4 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 6 }
+        ]
+      },
+      {
+        "threshold": 75,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 6 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 4 }
+        ]
+      },
+      {
+        "threshold": 100,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 8 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 6 }
+        ]
+      },
+      {
+        "threshold": 125,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 10 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 8 }
+        ]
+      },
+      {
+        "threshold": 150,
+        "effects": [
+          { "key": "보스 공격 시 대상 데미지 증가 %", "value": 12 },
+          { "key": "전설&필멸 등급 무기 데미지 증가 %", "value": 12 }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "질풍",
+    "stat": "spd",
+    "tiers": [
+      {
+        "threshold": 10,
+        "effects": [{ "key": "일반&고급 등급 무기 데미지 증가 %", "value": 3 }]
+      },
+      {
+        "threshold": 20,
+        "effects": [{ "key": "일반&고급 등급 무기 데미지 증가 %", "value": 3 }]
+      },
+      {
+        "threshold": 30,
+        "effects": [{ "key": "희귀 등급 무기 데미지 증가 %", "value": 4 }]
+      },
+      {
+        "threshold": 40,
+        "effects": [{ "key": "희귀 등급 무기 데미지 증가 %", "value": 4 }]
+      },
+      {
+        "threshold": 50,
+        "effects": [{ "key": "영웅 등급 무기 데미지 증가 %", "value": 5 }]
+      },
+      {
+        "threshold": 60,
+        "effects": [{ "key": "전설 등급 무기 데미지 증가 %", "value": 5 }]
+      },
+      {
+        "threshold": 75,
+        "effects": [{ "key": "필멸 등급 무기 데미지 증가 %", "value": 5 }]
+      },
+      {
+        "threshold": 100,
+        "effects": [{ "key": "신화 등급 무기 데미지 증가 %", "value": 6 }]
+      },
+      {
+        "threshold": 125,
+        "effects": [{ "key": "신화 등급 무기 데미지 증가 %", "value": 8 }]
+      },
+      {
+        "threshold": 150,
+        "effects": [{ "key": "신화 등급 무기 데미지 증가 %", "value": 10 }]
+      }
+    ]
+  },
+  {
+    "name": "철벽",
+    "stat": "vit",
+    "tiers": [
+      {
+        "threshold": 10,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 1 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 20,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 1 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 30,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 1 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 40,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 1 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 50,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 1 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
+        ]
+      },
+      {
+        "threshold": 60,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 2 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 3 }
+        ]
+      },
+      {
+        "threshold": 75,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 2 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 2 }
+        ]
+      },
+      {
+        "threshold": 100,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 3 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 3 }
+        ]
+      },
+      {
+        "threshold": 125,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 4 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 4 }
+        ]
+      },
+      {
+        "threshold": 150,
+        "effects": [
+          { "key": "받는 피해량 감소 %", "value": 4 },
+          { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 6 }
+        ]
+      }
+    ]
+  }
+]

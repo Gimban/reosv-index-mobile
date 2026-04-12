@@ -1,0 +1,51 @@
+[
+  {
+    "name": "삼위일체",
+    "tiers": [
+      {
+        "req": { "str": 3, "spd": 3, "vit": 3 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 3 }]
+      },
+      {
+        "req": { "str": 7, "spd": 7, "vit": 6 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 3 }]
+      },
+      {
+        "req": { "str": 10, "spd": 10, "vit": 10 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 3 }]
+      },
+      {
+        "req": { "str": 13, "spd": 13, "vit": 13 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 6 }]
+      },
+      {
+        "req": { "str": 17, "spd": 17, "vit": 16 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 6 }]
+      },
+      {
+        "req": { "str": 20, "spd": 20, "vit": 20 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 6 }]
+      },
+      {
+        "req": { "str": 25, "spd": 25, "vit": 25 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 9 }]
+      },
+      {
+        "req": { "str": 33, "spd": 33, "vit": 34 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 15 }]
+      },
+      {
+        "req": { "str": 42, "spd": 42, "vit": 41 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 18 }]
+      },
+      {
+        "req": { "str": 50, "spd": 50, "vit": 50 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 21 }]
+      },
+      {
+        "req": { "str": 60, "spd": 60, "vit": 60 },
+        "effects": [{ "key": "최종 데미지 증가 %", "value": 30 }]
+      }
+    ]
+  }
+]
