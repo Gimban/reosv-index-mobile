@@ -7,6 +7,10 @@ import {
   Paper,
   Alert,
   Button,
+  Chip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
 import { useDpsCalc } from "../../../contexts/DpsCalcContext";
 import { STAT_MAPPINGS } from "../../../utils/statMappings";
@@ -25,7 +29,11 @@ const Level = () => {
   const [vit, setVit] = useState(dpsState.vit || 0);
 
   // 시너지 보너스 계산 (상태 바로 아래에 배치하여 데이터 흐름을 명확히 함)
-  const synergyBonuses = useSynergyCalculator({ str, spd, vit });
+  const { bonuses: synergyBonuses, activeSynergies } = useSynergyCalculator({
+    str,
+    spd,
+    vit,
+  });
 
   // 상태 변경 시 전역 상태 업데이트
   useEffect(() => {
@@ -180,6 +188,61 @@ const Level = () => {
         </Box>
       </Paper>
 
+      <Paper sx={styles.section}>
+        <Typography variant="h6" gutterBottom>
+          활성화된 시너지
+        </Typography>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          {activeSynergies && activeSynergies.length > 0 ? (
+            activeSynergies.map((synergy) => (
+              <Accordion
+                key={synergy.name}
+                sx={{
+                  "&:before": { display: "none" },
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+                elevation={0}
+                disableGutters
+              >
+                <AccordionSummary
+                  expandIcon={<Typography variant="caption">▼</Typography>}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography variant="body2" fontWeight="bold">
+                      {synergy.name}
+                    </Typography>
+                    <Chip
+                      label={`Tier ${synergy.tier}`}
+                      size="small"
+                      color="secondary"
+                      sx={{ height: 20, fontSize: "0.65rem" }}
+                    />
+                  </Box>
+                </AccordionSummary>
+                <AccordionDetails sx={{ pt: 0, pb: 1 }}>
+                  {synergy.effects.map((eff, i) => (
+                    <Typography
+                      key={i}
+                      variant="caption"
+                      display="block"
+                      color="text.secondary"
+                    >
+                      • {eff.key}: +{eff.value}
+                      {eff.key.includes("%") ? "" : ""}
+                    </Typography>
+                  ))}
+                </AccordionDetails>
+              </Accordion>
+            ))
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              조건을 만족하는 시너지가 없습니다.
+            </Typography>
+          )}
+        </Box>
+      </Paper>
+
       <Paper sx={styles.resultSection}>
         <Typography variant="h6" gutterBottom>
           적용 효과
@@ -201,7 +264,16 @@ const Level = () => {
         </Box>
         <Box sx={styles.resultRow}>
           <Typography>{STAT_MAPPINGS.classBasicAttackDamage}</Typography>
-          <Typography>+{statBonuses.classBasicAttackDamage}</Typography>
+          <Typography>
+            +
+            {statBonuses.classBasicAttackDamage +
+              (synergyBonuses.classBasicAttackDamage || 0)}
+            {synergyBonuses.classBasicAttackDamage > 0 && (
+              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
+                (시너지 +{synergyBonuses.classBasicAttackDamage})
+              </Typography>
+            )}
+          </Typography>
         </Box>
         <Box sx={styles.resultRow}>
           <Typography>{STAT_MAPPINGS.classBasicAttackPercent}</Typography>

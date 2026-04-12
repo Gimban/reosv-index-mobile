@@ -17,31 +17,67 @@ export const checkRequirements = (stats, requirements) => {
 export const calculateSynergies = (stats, definitions) => {
   const { single = [], dual = [], triple = [] } = definitions;
   const totals = {};
+  const activeSynergies = [];
 
-  const add = (key, val) => {
+  const addGlobal = (key, val) => {
     const internalKey = getInternalKey(key); // 한글 키가 들어오면 영문 키로 변환
     totals[internalKey] = (totals[internalKey] || 0) + val;
   };
 
   // 1. 단일 스탯 시너지 (계단식 누적형)
-  // 예: 힘 10 달성 시 +2, 20 달성 시 +4가 추가되어 총 +6
-  single.forEach(({ stat, tiers = [] }) => {
+  single.forEach(({ name, stat, tiers = [] }) => {
     const statVal = stats[stat] || 0;
-    tiers.forEach(({ threshold, effects = [] }) => {
-      if (statVal >= threshold) {
-        effects.forEach(({ key, value }) => add(key, value));
+    let lastTier = 0;
+    const synergyTotals = {};
+
+    tiers.forEach((tier, index) => {
+      if (statVal >= tier.threshold) {
+        lastTier = index + 1;
+        tier.effects.forEach(({ key, value }) => {
+          synergyTotals[key] = (synergyTotals[key] || 0) + value;
+          addGlobal(key, value);
+        });
       }
     });
+
+    if (lastTier > 0) {
+      activeSynergies.push({
+        name,
+        tier: lastTier,
+        effects: Object.entries(synergyTotals).map(([key, value]) => ({
+          key,
+          value,
+        })),
+      });
+    }
   });
 
   // 2. 다중 스탯 시너지 (계단식 누적형)
-  [...dual, ...triple].forEach(({ tiers = [] }) => {
-    tiers.forEach(({ req, effects = [] }) => {
-      if (checkRequirements(stats, req)) {
-        effects.forEach(({ key, value }) => add(key, value));
+  [...dual, ...triple].forEach(({ name, tiers = [] }) => {
+    let lastTier = 0;
+    const synergyTotals = {};
+
+    tiers.forEach((tier, index) => {
+      if (checkRequirements(stats, tier.req)) {
+        lastTier = index + 1;
+        tier.effects.forEach(({ key, value }) => {
+          synergyTotals[key] = (synergyTotals[key] || 0) + value;
+          addGlobal(key, value);
+        });
       }
     });
+
+    if (lastTier > 0) {
+      activeSynergies.push({
+        name,
+        tier: lastTier,
+        effects: Object.entries(synergyTotals).map(([key, value]) => ({
+          key,
+          value,
+        })),
+      });
+    }
   });
 
-  return totals;
+  return { totals, activeSynergies };
 };

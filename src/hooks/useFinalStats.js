@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { SHARED_STAT_INFO } from "../components/DpsCalc/DivineShard/DivineShardData";
 
+const CRITICAL_DAMAGE_BONUS = 0.5; // 치명타 발생 시 추가 피해량 (50%)
+
 export const useFinalStats = (dpsState, processedWeaponData) => {
   const finalStats = useMemo(() => {
     // 기본값 설정
@@ -17,45 +19,7 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       return isNaN(num) ? 0 : num;
     };
 
-    // 장신구 옵션 처리
-    const accessoryStats = dpsState.accessories?.totalStats || {};
-    const getStat = (name) => parseNumber(accessoryStats[name]);
-
-    const acc = {
-      classBasicAttackDamage: getStat("클래스 기본 공격 데미지 증가 +"),
-      classSkillDamagePercent: getStat("클래스 스킬 데미지 증가 %"),
-      classBasicAttackPercent: getStat("클래스 기본 공격 데미지 증가 %"),
-      finalDamageStat: getStat("최종 데미지 스탯 증가 +"),
-      healthStat: getStat("체력 스탯 증가 +"),
-      normalMonsterDamagePercent: getStat("일반 몬스터 대상 데미지 증가 %"),
-      bossMonsterDamagePercent: getStat("보스 공격 시 대상 데미지 증가 %"),
-      cooldownReductionPercent: getStat("스킬 쿨타임 감소 %"),
-      specialWeaponDamagePercent: getStat("특수 무기 데미지 증가 %"),
-      commonAdvancedWeaponDamagePercent: getStat(
-        "일반&고급 등급 무기 데미지 증가 %",
-      ),
-      rareWeaponDamagePercent: getStat("희귀 등급 무기 데미지 증가 %"),
-      heroicWeaponDamagePercent: getStat("영웅 등급 무기 데미지 증가 %"),
-      legendaryWeaponDamagePercent: getStat("전설 등급 무기 데미지 증가 %"),
-      legendaryMortalWeaponDamagePercent: getStat(
-        "전설&필멸 등급 무기 데미지 증가 %",
-      ),
-      mortalWeaponDamagePercent: getStat("필멸 등급 무기 데미지 증가 %"),
-      mythicWeaponDamagePercent: getStat("신화 등급 무기 데미지 증가 %"),
-      legendaryMythicWeaponDamagePercent: getStat(
-        "전설&신화 등급 무기 데미지 증가 %",
-      ),
-      mortalMythicWeaponDamagePercent: getStat(
-        "필멸&신화 등급 무기 데미지 증가 %",
-      ),
-      destinyWeaponDamagePercent: getStat("운명 등급 무기 데미지 증가 %"),
-      maxManaFlat: getStat("최대 마나 증가 +"),
-      maxManaPercent: getStat("최대 마나 증가 %"),
-      manaRegenFlat: getStat("마나 회복량 증가 +"),
-      manaRegenPercent: getStat("마나 회복량 증가 %"),
-    };
-
-    // 2. 레벨 스탯 및 시너지 데이터 추출
+    // 1. 레벨 스탯 및 시너지 데이터 추출
     const {
       level = 1,
       str = 0,
@@ -64,6 +28,100 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       synergyBonuses = {},
     } = dpsState || {};
 
+    // 2. 장신구 옵션 처리 (시너지 보너스와 합산)
+    const accessoryStats = dpsState.accessories?.totalStats || {};
+    // 장신구 수치와 시너지 수치를 합쳐주는 헬퍼
+    const getCombinedStat = (displayName, synergyKey) =>
+      parseNumber(accessoryStats[displayName]) +
+      (synergyBonuses[synergyKey] || 0);
+
+    const acc = {
+      // DPS 메인 로직에서 별도로 계산되는 항목들 (중복 합산 방지)
+      classBasicAttackDamage: parseNumber(
+        accessoryStats["클래스 기본 공격 데미지 증가 +"],
+      ),
+      classSkillDamagePercent: parseNumber(
+        accessoryStats["클래스 스킬 데미지 증가 %"],
+      ),
+      classBasicAttackPercent: parseNumber(
+        accessoryStats["클래스 기본 공격 데미지 증가 %"],
+      ),
+      cooldownReductionPercent: parseNumber(
+        accessoryStats["스킬 쿨타임 감소 %"],
+      ),
+
+      // 장신구 + 시너지가 즉시 통합되어야 하는 항목들
+      finalDamageStat: getCombinedStat(
+        "최종 데미지 스탯 증가 +",
+        "finalDamageStat",
+      ),
+      healthStat: getCombinedStat("체력 스탯 증가 +", "healthStat"),
+      normalMonsterDamagePercent: getCombinedStat(
+        "일반 몬스터 대상 데미지 증가 %",
+        "normalMonsterDamagePercent",
+      ),
+      bossMonsterDamagePercent: getCombinedStat(
+        "보스 공격 시 대상 데미지 증가 %",
+        "bossMonsterDamagePercent",
+      ),
+      specialWeaponDamagePercent: getCombinedStat(
+        "특수 무기 데미지 증가 %",
+        "specialWeaponDamagePercent",
+      ),
+      commonAdvancedWeaponDamagePercent: getCombinedStat(
+        "일반&고급 등급 무기 데미지 증가 %",
+        "commonAdvancedWeaponDamagePercent",
+      ),
+      rareWeaponDamagePercent: getCombinedStat(
+        "희귀 등급 무기 데미지 증가 %",
+        "rareWeaponDamagePercent",
+      ),
+      heroicWeaponDamagePercent: getCombinedStat(
+        "영웅 등급 무기 데미지 증가 %",
+        "heroicWeaponDamagePercent",
+      ),
+      legendaryWeaponDamagePercent: getCombinedStat(
+        "전설 등급 무기 데미지 증가 %",
+        "legendaryWeaponDamagePercent",
+      ),
+      legendaryMortalWeaponDamagePercent: getCombinedStat(
+        "전설&필멸 등급 무기 데미지 증가 %",
+        "legendaryMortalWeaponDamagePercent",
+      ),
+      mortalWeaponDamagePercent: getCombinedStat(
+        "필멸 등급 무기 데미지 증가 %",
+        "mortalWeaponDamagePercent",
+      ),
+      mythicWeaponDamagePercent: getCombinedStat(
+        "신화 등급 무기 데미지 증가 %",
+        "mythicWeaponDamagePercent",
+      ),
+      legendaryMythicWeaponDamagePercent: getCombinedStat(
+        "전설&신화 등급 무기 데미지 증가 %",
+        "legendaryMythicWeaponDamagePercent",
+      ),
+      mortalMythicWeaponDamagePercent: getCombinedStat(
+        "필멸&신화 등급 무기 데미지 증가 %",
+        "mortalMythicWeaponDamagePercent",
+      ),
+      destinyWeaponDamagePercent: getCombinedStat(
+        "운명 등급 무기 데미지 증가 %",
+        "destinyWeaponDamagePercent",
+      ),
+      maxManaFlat: getCombinedStat("최대 마나 증가 +", "maxManaFlat"),
+      maxManaPercent: getCombinedStat("최대 마나 증가 %", "maxManaPercent"),
+      manaRegenFlat: getCombinedStat("마나 회복량 증가 +", "manaRegenFlat"),
+      manaRegenPercent: getCombinedStat(
+        "마나 회복량 증가 %",
+        "manaRegenPercent",
+      ),
+      criticalRate: getCombinedStat("치명타 확률 %", "criticalRate"),
+      cooldownReductionLimitPercent: getCombinedStat(
+        "쿨타임 감소 상한 증가 %",
+        "cooldownReductionLimitPercent",
+      ),
+    };
+
     const s = parseInt(str, 10) || 0;
     const a = parseInt(spd, 10) || 0;
     const v = parseInt(vit, 10) || 0;
@@ -71,11 +129,14 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
 
     // 7. 스킬 쿨타임 감소
     const statCooldownReduction = a * 0.1;
+    const baseCdLimit = 40;
+    const totalCdLimit = baseCdLimit + acc.cooldownReductionLimitPercent;
+
     const totalCooldownReduction = Math.min(
       acc.cooldownReductionPercent +
         statCooldownReduction +
         (synergyBonuses.cooldownReductionPercent || 0),
-      40,
+      totalCdLimit,
     );
     const cooldownMultiplier = 1 - totalCooldownReduction / 100;
 
@@ -192,17 +253,21 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       classSkillDamagePercent: 0,
     };
 
-    if (!isOverLimit) {
-      damageBonusFromStats = s * 0.65 + (a + v) * 0.4;
-      classBonus = {
-        classBasicAttackDamage:
-          s * 5 + (synergyBonuses.classBasicAttackDamage || 0),
-        classBasicAttackPercent:
-          s * 0.3 + (synergyBonuses.classBasicAttackPercent || 0),
-        classSkillDamagePercent:
-          a * 0.3 + (synergyBonuses.classSkillDamagePercent || 0),
-      };
-    }
+    // 스탯 기본 보너스 (포인트 초과 시 0)
+    damageBonusFromStats = isOverLimit ? 0 : s * 0.65 + (a + v) * 0.4;
+
+    // 클래스 보너스 (스탯분은 초과 시 0, 시너지는 항상 유지)
+    classBonus = {
+      classBasicAttackDamage:
+        (isOverLimit ? 0 : s * 5) +
+        (synergyBonuses.classBasicAttackDamage || 0),
+      classBasicAttackPercent:
+        (isOverLimit ? 0 : s * 0.3) +
+        (synergyBonuses.classBasicAttackPercent || 0),
+      classSkillDamagePercent:
+        (isOverLimit ? 0 : a * 0.3) +
+        (synergyBonuses.classSkillDamagePercent || 0),
+    };
 
     // 장신구 스탯 보너스 추가 (3, 4)
     damageBonusFromStats += acc.finalDamageStat * 0.65;
@@ -310,7 +375,11 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
     }
 
     // 최종 DPS 계산 (모든 배율 적용)
-    const finalDps = baseDps * finalDamageMultiplier;
+    // 치명타 배율 계산 (기대값 방식: 1 + 확률 * 추가피해)
+    const criticalMultiplier =
+      1 + (Math.max(0, acc.criticalRate) / 100) * CRITICAL_DAMAGE_BONUS;
+
+    const finalDps = baseDps * finalDamageMultiplier * criticalMultiplier;
 
     const totalDpsVsNormal =
       finalDps * (1 + acc.normalMonsterDamagePercent / 100);

@@ -128,70 +128,70 @@
       {
         "threshold": 10,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 1 },
+          { "key": "받는 피해량 감소 %", "value": 1 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
         ]
       },
       {
         "threshold": 20,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 1 },
+          { "key": "받는 피해량 감소 %", "value": 1 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
         ]
       },
       {
         "threshold": 30,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 1 },
+          { "key": "받는 피해량 감소 %", "value": 1 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
         ]
       },
       {
         "threshold": 40,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 1 },
+          { "key": "받는 피해량 감소 %", "value": 1 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
         ]
       },
       {
         "threshold": 50,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 1 },
+          { "key": "받는 피해량 감소 %", "value": 1 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 0 }
         ]
       },
       {
         "threshold": 60,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 2 },
+          { "key": "받는 피해량 감소 %", "value": 2 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 3 }
         ]
       },
       {
         "threshold": 75,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 2 },
+          { "key": "받는 피해량 감소 %", "value": 2 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 2 }
         ]
       },
       {
         "threshold": 100,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 3 },
+          { "key": "받는 피해량 감소 %", "value": 3 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 3 }
         ]
       },
       {
         "threshold": 125,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 4 },
+          { "key": "받는 피해량 감소 %", "value": 4 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 4 }
         ]
       },
       {
         "threshold": 150,
         "effects": [
-          { "key": "받는 피해 감소 %", "value": 4 },
+          { "key": "받는 피해량 감소 %", "value": 4 },
           { "key": "필멸&신화 등급 무기 데미지 증가 %", "value": 6 }
         ]
       }

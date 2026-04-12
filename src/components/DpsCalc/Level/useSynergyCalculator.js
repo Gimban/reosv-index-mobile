@@ -16,12 +16,36 @@ export const useSynergyCalculator = (stats) => {
   useEffect(() => {
     const fetchSynergyData = async () => {
       try {
+        const publicUrl = process.env.PUBLIC_URL || "";
+
         // public/data/ 폴더에 JSON 파일이 있다고 가정합니다.
         const [singleRes, dualRes, tripleRes] = await Promise.all([
-          fetch("/data/single_synergy.json"),
-          fetch("/data/dual_synergy.json"),
-          fetch("/data/triple_synergy.json"),
+          fetch(`${publicUrl}/data/single_synergy.json`),
+          fetch(`${publicUrl}/data/dual_synergy.json`),
+          fetch(`${publicUrl}/data/triple_synergy.json`),
         ]);
+
+        // 응답 상태 확인
+        if (!singleRes.ok || !dualRes.ok || !tripleRes.ok) {
+          const failed = [];
+          if (!singleRes.ok) failed.push("single_synergy.json");
+          if (!dualRes.ok) failed.push("dual_synergy.json");
+          if (!tripleRes.ok) failed.push("triple_synergy.json");
+
+          throw new Error(
+            `파일을 찾을 수 없습니다: ${failed.join(", ")} (Status: ${singleRes.status})`,
+          );
+        }
+
+        // JSON 형식인지 추가 확인 (HTML이 반환되는 것 방지)
+        const isJson = (res) =>
+          res.headers.get("content-type")?.includes("application/json");
+
+        if (!isJson(singleRes) || !isJson(dualRes) || !isJson(tripleRes)) {
+          throw new Error(
+            "서버에서 JSON 대신 HTML 형식이 반환되었습니다. public/data/ 내에 파일이 있는지 확인해주세요.",
+          );
+        }
 
         const [single, dual, triple] = await Promise.all([
           singleRes.json(),
@@ -42,7 +66,10 @@ export const useSynergyCalculator = (stats) => {
 
   const synergies = useMemo(() => {
     if (isLoading) {
-      return {}; // 데이터 로딩 중에는 빈 객체 반환
+      return {
+        bonuses: {},
+        activeSynergies: [],
+      };
     }
     const safeStats = {
       str: Number(stats.str) || 0,
@@ -50,7 +77,11 @@ export const useSynergyCalculator = (stats) => {
       vit: Number(stats.vit) || 0,
     };
 
-    return calculateSynergies(safeStats, synergyDefinitions);
+    const result = calculateSynergies(safeStats, synergyDefinitions);
+    return {
+      bonuses: result.totals,
+      activeSynergies: result.activeSynergies,
+    };
   }, [stats.str, stats.spd, stats.vit, synergyDefinitions, isLoading]);
 
   return synergies;
