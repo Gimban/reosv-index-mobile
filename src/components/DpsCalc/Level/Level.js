@@ -24,7 +24,8 @@ const Level = () => {
   const [spd, setSpd] = useState(dpsState.spd || 0);
   const [vit, setVit] = useState(dpsState.vit || 0);
 
-  // 기존 스탯 state (moveSpeed, statType, customAttack, customHealth)는 더 이상 사용하지 않음
+  // 시너지 보너스 계산 (상태 바로 아래에 배치하여 데이터 흐름을 명확히 함)
+  const synergyBonuses = useSynergyCalculator({ str, spd, vit });
 
   // 상태 변경 시 전역 상태 업데이트
   useEffect(() => {
@@ -32,8 +33,10 @@ const Level = () => {
     updateDpsState("str", str);
     updateDpsState("spd", spd);
     updateDpsState("vit", vit);
+    // 계산된 시너지를 전역 상태에 저장하여 useFinalStats에서 참조 가능하게 함
+    updateDpsState("synergyBonuses", synergyBonuses);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, str, spd, vit]);
+  }, [level, str, spd, vit, synergyBonuses]);
 
   // 사용 가능한 총 포인트 (레벨)
   const totalPoints = Math.max(0, level);
@@ -71,10 +74,10 @@ const Level = () => {
   const statBonuses = useMemo(() => {
     if (isOverLimit)
       return {
-        basicAttackFlat: 0,
-        basicAttackPercent: 0,
-        cooldownReduction: 0,
-        skillDamagePercent: 0,
+        classBasicAttackDamage: 0,
+        classBasicAttackPercent: 0,
+        cooldownReductionPercent: 0,
+        classSkillDamagePercent: 0,
         moveSpeed: 0,
         maxHealthPercent: 0,
       };
@@ -84,17 +87,14 @@ const Level = () => {
     const v = parseInt(vit, 10) || 0;
 
     return {
-      basicAttackFlat: s * 5, // 기본 공격 피해량 +5
-      basicAttackPercent: s * 0.3, // 기본 공격 피해량 +0.3%
-      cooldownReduction: a * 0.1, // 쿨타임 감소 +0.1%
-      skillDamagePercent: a * 0.3, // 스킬 피해량 0.3%
+      classBasicAttackDamage: s * 5, // 기본 공격 피해량 +5
+      classBasicAttackPercent: s * 0.3, // 기본 공격 피해량 +0.3%
+      cooldownReductionPercent: a * 0.1, // 쿨타임 감소 +0.1%
+      classSkillDamagePercent: a * 0.3, // 스킬 피해량 0.3%
       moveSpeed: Math.min(0.1, a * 0.005), // 이동 속도 +0.005 (+0.1 까지 제한)
       maxHealthPercent: v * 0.2, // 최대 체력 +0.2%
     };
   }, [str, spd, vit, isOverLimit]);
-
-  // 시너지 보너스 계산 (Hook 사용)
-  const synergyBonuses = useSynergyCalculator({ str, spd, vit });
 
   // 마나 관련 계산 (5레벨당 증가)
   const maxMana = 100 + Math.floor(level / 5) * 5;
@@ -200,44 +200,46 @@ const Level = () => {
           </Typography>
         </Box>
         <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.basicAttackFlat}</Typography>
-          <Typography>+{statBonuses.basicAttackFlat}</Typography>
+          <Typography>{STAT_MAPPINGS.classBasicAttackDamage}</Typography>
+          <Typography>+{statBonuses.classBasicAttackDamage}</Typography>
         </Box>
         <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.basicAttackPercent}</Typography>
+          <Typography>{STAT_MAPPINGS.classBasicAttackPercent}</Typography>
           <Typography>
             +
             {(
-              statBonuses.basicAttackPercent +
-              (synergyBonuses.basicAttackPercent || 0)
+              statBonuses.classBasicAttackPercent +
+              (synergyBonuses.classBasicAttackPercent || 0)
             ).toFixed(1)}
             %
-            {synergyBonuses.basicAttackPercent > 0 && (
+            {synergyBonuses.classBasicAttackPercent > 0 && (
               <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.basicAttackPercent}%)
+                (시너지 +{synergyBonuses.classBasicAttackPercent}%)
               </Typography>
             )}
           </Typography>
         </Box>
         <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.skillDamagePercent}</Typography>
+          <Typography>{STAT_MAPPINGS.classSkillDamagePercent}</Typography>
           <Typography>
             +
             {(
-              statBonuses.skillDamagePercent +
-              (synergyBonuses.skillDamagePercent || 0)
+              statBonuses.classSkillDamagePercent +
+              (synergyBonuses.classSkillDamagePercent || 0)
             ).toFixed(1)}
             %
-            {synergyBonuses.skillDamagePercent > 0 && (
+            {synergyBonuses.classSkillDamagePercent > 0 && (
               <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.skillDamagePercent}%)
+                (시너지 +{synergyBonuses.classSkillDamagePercent}%)
               </Typography>
             )}
           </Typography>
         </Box>
         <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.cooldownReduction}</Typography>
-          <Typography>+{statBonuses.cooldownReduction.toFixed(1)}%</Typography>
+          <Typography>{STAT_MAPPINGS.cooldownReductionPercent}</Typography>
+          <Typography>
+            +{statBonuses.cooldownReductionPercent.toFixed(1)}%
+          </Typography>
         </Box>
         <Box sx={styles.resultRow}>
           <Typography>{STAT_MAPPINGS.moveSpeed}</Typography>

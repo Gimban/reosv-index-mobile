@@ -2,13 +2,13 @@
 
 // 내부 로직용 키(Key) -> 화면 표시용 텍스트(Label) 매핑
 export const STAT_MAPPINGS = {
-  finalDamagePercent: "최종 데미지 증가",
-  basicAttackFlat: "클래스 기본 공격 데미지 증가 (+)",
-  basicAttackPercent: "클래스 기본 공격 데미지 증가 (%)",
-  skillDamagePercent: "클래스 스킬 데미지 증가",
-  cooldownReduction: "쿨타임 감소",
-  moveSpeed: "이동 속도",
-  maxHealthPercent: "최대 체력",
+  finalDamagePercent: "최종 데미지 증가 %",
+  classBasicAttackDamage: "클래스 기본 공격 데미지 증가 +",
+  classBasicAttackPercent: "클래스 기본 공격 데미지 증가 %",
+  classSkillDamagePercent: "클래스 스킬 데미지 증가 %",
+  cooldownReductionPercent: "스킬 쿨타임 감소 %",
+  moveSpeed: "이동 속도 증가 +",
+  maxHealthPercent: "최대 체력 증가 %",
 };
 
 // 화면 표시용 텍스트(Label) -> 내부 로직용 키(Key) 역매핑 생성

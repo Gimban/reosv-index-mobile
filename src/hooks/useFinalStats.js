@@ -24,6 +24,7 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
     const acc = {
       classBasicAttackDamage: getStat("클래스 기본 공격 데미지 증가 +"),
       classSkillDamagePercent: getStat("클래스 스킬 데미지 증가 %"),
+      classBasicAttackPercent: getStat("클래스 기본 공격 데미지 증가 %"),
       finalDamageStat: getStat("최종 데미지 스탯 증가 +"),
       healthStat: getStat("체력 스탯 증가 +"),
       normalMonsterDamagePercent: getStat("일반 몬스터 대상 데미지 증가 %"),
@@ -54,9 +55,29 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       manaRegenPercent: getStat("마나 회복량 증가 %"),
     };
 
+    // 2. 레벨 스탯 및 시너지 데이터 추출
+    const {
+      level = 1,
+      str = 0,
+      spd = 0,
+      vit = 0,
+      synergyBonuses = {},
+    } = dpsState || {};
+
+    const s = parseInt(str, 10) || 0;
+    const a = parseInt(spd, 10) || 0;
+    const v = parseInt(vit, 10) || 0;
+    const safeLevel = parseInt(level, 10) || 1;
+
     // 7. 스킬 쿨타임 감소
-    const cooldownMultiplier =
-      1 - Math.min(acc.cooldownReductionPercent, 40) / 100;
+    const statCooldownReduction = a * 0.1;
+    const totalCooldownReduction = Math.min(
+      acc.cooldownReductionPercent +
+        statCooldownReduction +
+        (synergyBonuses.cooldownReductionPercent || 0),
+      40,
+    );
+    const cooldownMultiplier = 1 - totalCooldownReduction / 100;
 
     // 1. 특수 무기 DPS 및 마나 소모 계산 (Base DPS)
     if (dpsState.specialWeapons) {
@@ -159,40 +180,28 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
       });
     }
 
-    // 2. 레벨 스탯 계산
-    const {
-      level = 1,
-      moveSpeed = 0,
-      statType = "attack",
-      customAttack = 0,
-      customHealth = 0,
-    } = dpsState || {};
-
-    const safeLevel = parseInt(level, 10) || 1;
-    const totalPoints = Math.max(0, safeLevel - 1);
-    const msPoints = parseInt(moveSpeed, 10) || 0;
-    const customAtkPoints = parseInt(customAttack, 10) || 0;
-    const customHpPoints = parseInt(customHealth, 10) || 0;
-
-    let usedPoints = msPoints;
-    if (statType === "custom") {
-      usedPoints += customAtkPoints + customHpPoints;
-    }
-
-    const isOverLimit =
-      statType === "custom" ? usedPoints > totalPoints : msPoints > totalPoints;
+    // 레벨 스탯 포인트 검증
+    const usedPoints = s + a + v;
+    const totalPoints = Math.max(0, safeLevel);
+    const isOverLimit = usedPoints > totalPoints;
 
     let damageBonusFromStats = 0;
+    let classBonus = {
+      classBasicAttackDamage: 0,
+      classBasicAttackPercent: 0,
+      classSkillDamagePercent: 0,
+    };
+
     if (!isOverLimit) {
-      if (statType === "attack") {
-        const remaining = Math.max(0, totalPoints - msPoints);
-        damageBonusFromStats = remaining * 0.65;
-      } else if (statType === "health") {
-        const remaining = Math.max(0, totalPoints - msPoints);
-        damageBonusFromStats = remaining * 0.4;
-      } else if (statType === "custom") {
-        damageBonusFromStats = customAtkPoints * 0.65 + customHpPoints * 0.4;
-      }
+      damageBonusFromStats = s * 0.65 + (a + v) * 0.4;
+      classBonus = {
+        classBasicAttackDamage:
+          s * 5 + (synergyBonuses.classBasicAttackDamage || 0),
+        classBasicAttackPercent:
+          s * 0.3 + (synergyBonuses.classBasicAttackPercent || 0),
+        classSkillDamagePercent:
+          a * 0.3 + (synergyBonuses.classSkillDamagePercent || 0),
+      };
     }
 
     // 장신구 스탯 보너스 추가 (3, 4)
@@ -231,7 +240,10 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
 
     // 최종 대미지 배율에 합산
     finalDamageMultiplier +=
-      (damageBonusFromStats + shardFinalDamagePercent) / 100;
+      (damageBonusFromStats +
+        shardFinalDamagePercent +
+        (synergyBonuses.finalDamagePercent || 0)) /
+      100;
 
     // 마나 계산
     // 최대 마나: 기본 100, 5레벨마다 5 증가
@@ -273,12 +285,23 @@ export const useFinalStats = (dpsState, processedWeaponData) => {
         if (damage > 0 && effectiveCooldown > 0) {
           let skillDps = 0;
           if (skill.name === "좌클릭") {
-            // 1. 클래스 기본 공격 데미지 증가
-            damage += acc.classBasicAttackDamage;
+            // 1. 클래스 기본 공격 데미지 증가 (+ 및 %)
+            damage =
+              (damage +
+                acc.classBasicAttackDamage +
+                classBonus.classBasicAttackDamage) *
+              (1 +
+                (acc.classBasicAttackPercent +
+                  classBonus.classBasicAttackPercent) /
+                  100);
             skillDps = damage / effectiveCooldown;
           } else {
             // 2. 클래스 스킬 데미지 증가
-            damage *= 1 + acc.classSkillDamagePercent / 100;
+            damage *=
+              1 +
+              (acc.classSkillDamagePercent +
+                classBonus.classSkillDamagePercent) /
+                100;
             skillDps = damage / effectiveCooldown;
           }
           baseDps += skillDps;
