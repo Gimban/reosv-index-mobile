@@ -104,6 +104,42 @@ const Level = () => {
     };
   }, [str, spd, vit, isOverLimit]);
 
+  // 모든 보너스(기본 + 시너지) 통합 및 유효 옵션 필터링
+  const combinedBonuses = useMemo(() => {
+    const combined = [];
+
+    Object.keys(STAT_MAPPINGS).forEach((key) => {
+      const base =
+        (!isOverLimit &&
+          {
+            finalDamagePercent: finalDamageBonus,
+            classBasicAttackDamage: statBonuses.classBasicAttackDamage,
+            classBasicAttackPercent: statBonuses.classBasicAttackPercent,
+            cooldownReductionPercent: statBonuses.cooldownReductionPercent,
+            classSkillDamagePercent: statBonuses.classSkillDamagePercent,
+            moveSpeed: statBonuses.moveSpeed,
+            maxHealthPercent: statBonuses.maxHealthPercent,
+          }[key]) ||
+        0;
+
+      const synergy = synergyBonuses[key] || 0;
+      const total = base + synergy;
+
+      // 합계가 0보다 큰 경우만 유효 옵션으로 간주하여 리스트에 추가
+      if (total > 0) {
+        combined.push({
+          key,
+          name: STAT_MAPPINGS[key],
+          base,
+          synergy,
+          total,
+        });
+      }
+    });
+
+    return combined;
+  }, [statBonuses, synergyBonuses, finalDamageBonus, isOverLimit]);
+
   // 마나 관련 계산 (5레벨당 증가)
   const maxMana = 100 + Math.floor(level / 5) * 5;
   const manaRegen = 4 + Math.floor(level / 5) * 0.05;
@@ -247,102 +283,39 @@ const Level = () => {
         <Typography variant="h6" gutterBottom>
           적용 효과
         </Typography>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.finalDamagePercent}</Typography>
-          <Typography color="primary" fontWeight="bold">
-            +
-            {(
-              finalDamageBonus + (synergyBonuses.finalDamagePercent || 0)
-            ).toFixed(2)}
-            %
-            {synergyBonuses.finalDamagePercent > 0 && (
-              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.finalDamagePercent}%)
+        {combinedBonuses.map((bonus) => {
+          const isPercent = bonus.name.includes("%");
+          const isMoveSpeed = bonus.key === "moveSpeed";
+          const isFinalDamage = bonus.key === "finalDamagePercent";
+
+          let displayTotal = bonus.total;
+          if (isFinalDamage) displayTotal = displayTotal.toFixed(2);
+          else if (isMoveSpeed) displayTotal = displayTotal.toFixed(3);
+          else if (isPercent) displayTotal = displayTotal.toFixed(1);
+          else if (!Number.isInteger(displayTotal))
+            displayTotal = displayTotal.toFixed(1);
+
+          return (
+            <Box key={bonus.key} sx={styles.resultRow}>
+              <Typography variant="body2">{bonus.name}</Typography>
+              <Typography
+                variant="body2"
+                color={isFinalDamage ? "primary" : "text.primary"}
+                fontWeight={isFinalDamage ? "bold" : "normal"}
+              >
+                +{displayTotal}
+                {isPercent ? "%" : ""}
+                {bonus.synergy > 0 && (
+                  <Typography component="span" variant="caption" sx={{ ml: 1 }}>
+                    (시너지 +{bonus.synergy}
+                    {isPercent ? "%" : ""})
+                  </Typography>
+                )}
               </Typography>
-            )}
-          </Typography>
-        </Box>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.classBasicAttackDamage}</Typography>
-          <Typography>
-            +
-            {statBonuses.classBasicAttackDamage +
-              (synergyBonuses.classBasicAttackDamage || 0)}
-            {synergyBonuses.classBasicAttackDamage > 0 && (
-              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.classBasicAttackDamage})
-              </Typography>
-            )}
-          </Typography>
-        </Box>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.classBasicAttackPercent}</Typography>
-          <Typography>
-            +
-            {(
-              statBonuses.classBasicAttackPercent +
-              (synergyBonuses.classBasicAttackPercent || 0)
-            ).toFixed(1)}
-            %
-            {synergyBonuses.classBasicAttackPercent > 0 && (
-              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.classBasicAttackPercent}%)
-              </Typography>
-            )}
-          </Typography>
-        </Box>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.classSkillDamagePercent}</Typography>
-          <Typography>
-            +
-            {(
-              statBonuses.classSkillDamagePercent +
-              (synergyBonuses.classSkillDamagePercent || 0)
-            ).toFixed(1)}
-            %
-            {synergyBonuses.classSkillDamagePercent > 0 && (
-              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.classSkillDamagePercent}%)
-              </Typography>
-            )}
-          </Typography>
-        </Box>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.cooldownReductionPercent}</Typography>
-          <Typography>
-            +{statBonuses.cooldownReductionPercent.toFixed(1)}%
-          </Typography>
-        </Box>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.moveSpeed}</Typography>
-          <Typography>
-            +
-            {(statBonuses.moveSpeed + (synergyBonuses.moveSpeed || 0)).toFixed(
-              3,
-            )}
-            {synergyBonuses.moveSpeed > 0 && (
-              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.moveSpeed})
-              </Typography>
-            )}
-          </Typography>
-        </Box>
-        <Box sx={styles.resultRow}>
-          <Typography>{STAT_MAPPINGS.maxHealthPercent}</Typography>
-          <Typography>
-            +
-            {(
-              statBonuses.maxHealthPercent +
-              (synergyBonuses.maxHealthPercent || 0)
-            ).toFixed(1)}
-            %
-            {synergyBonuses.maxHealthPercent > 0 && (
-              <Typography component="span" variant="caption" sx={{ ml: 1 }}>
-                (시너지 +{synergyBonuses.maxHealthPercent}%)
-              </Typography>
-            )}
-          </Typography>
-        </Box>
+            </Box>
+          );
+        })}
+
         <Box sx={styles.resultRow}>
           <Typography>최대 마나 (레벨 기반)</Typography>
           <Typography>{maxMana}</Typography>
