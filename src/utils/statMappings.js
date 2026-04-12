@@ -28,6 +28,9 @@ export const STAT_MAPPINGS = {
   manaRegenPercent: "마나 회복량 증가 %",
   damageReductionPercent: "받는 피해량 감소 %",
   criticalRate: "치명타 확률 %",
+  cooldownReductionLimitPercent: "쿨타임 감소 상한 증가 %",
+  finalDamageStat: "최종 데미지 스탯 증가 +",
+  healthStat: "체력 스탯 증가 +",
 };
 
 // 화면 표시용 텍스트(Label) -> 내부 로직용 키(Key) 역매핑 생성
