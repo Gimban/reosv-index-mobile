@@ -148,7 +148,7 @@ const Level = () => {
   const handleLevelChange = (e) => {
     const val = parseInt(e.target.value, 10);
     if (isNaN(val)) setLevel("");
-    else setLevel(Math.min(110, Math.max(1, val)));
+    else setLevel(Math.min(150, Math.max(1, val)));
   };
 
   const handleStatChange = (setter) => (e) => {
@@ -170,9 +170,9 @@ const Level = () => {
             type="number"
             value={level}
             onChange={handleLevelChange}
-            inputProps={{ min: 1, max: 110 }}
+            inputProps={{ min: 1, max: 150 }}
             fullWidth
-            helperText="1 ~ 110"
+            helperText="1 ~ 150"
           />
         </Box>
 
