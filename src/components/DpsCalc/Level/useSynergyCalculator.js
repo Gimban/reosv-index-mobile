@@ -5,7 +5,7 @@ import { calculateSynergies } from "../../../utils/synergyUtils";
  * 플레이어 스탯을 기반으로 시너지 보너스를 계산하는 Hook
  * @param {Object} stats - { str, spd, vit } 형태의 스탯 객체
  */
-export const useSynergyCalculator = (stats) => {
+export const useSynergyCalculator = (stats, isSynergyMultiplierEnabled = false) => {
   const [synergyDefinitions, setSynergyDefinitions] = useState({
     single: [],
     dual: [],
@@ -78,11 +78,26 @@ export const useSynergyCalculator = (stats) => {
     };
 
     const result = calculateSynergies(safeStats, synergyDefinitions);
+    const multiplier = isSynergyMultiplierEnabled ? 1.5 : 1;
+
+    const multipliedTotals = {};
+    Object.entries(result.totals).forEach(([key, val]) => {
+      multipliedTotals[key] = val * multiplier;
+    });
+
+    const multipliedActiveSynergies = (result.activeSynergies || []).map((syn) => ({
+      ...syn,
+      effects: (syn.effects || []).map((eff) => ({
+        ...eff,
+        value: eff.value * multiplier,
+      })),
+    }));
+
     return {
-      bonuses: result.totals,
-      activeSynergies: result.activeSynergies,
+      bonuses: multipliedTotals,
+      activeSynergies: multipliedActiveSynergies,
     };
-  }, [stats.str, stats.spd, stats.vit, synergyDefinitions, isLoading]);
+  }, [stats.str, stats.spd, stats.vit, synergyDefinitions, isLoading, isSynergyMultiplierEnabled]);
 
   return synergies;
 };

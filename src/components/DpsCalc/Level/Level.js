@@ -11,6 +11,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { useDpsCalc } from "../../../contexts/DpsCalcContext";
 import { STAT_MAPPINGS } from "../../../utils/statMappings";
@@ -27,13 +29,20 @@ const Level = () => {
   const [str, setStr] = useState(dpsState.str || 0);
   const [spd, setSpd] = useState(dpsState.spd || 0);
   const [vit, setVit] = useState(dpsState.vit || 0);
+  // 시너지 효과 1.5배 멀티플라이어 상태
+  const [isSynergyMultiplierEnabled, setIsSynergyMultiplierEnabled] = useState(
+    dpsState.isSynergyMultiplierEnabled || false,
+  );
 
   // 시너지 보너스 계산 (상태 바로 아래에 배치하여 데이터 흐름을 명확히 함)
-  const { bonuses: synergyBonuses, activeSynergies } = useSynergyCalculator({
-    str,
-    spd,
-    vit,
-  });
+  const { bonuses: synergyBonuses, activeSynergies } = useSynergyCalculator(
+    {
+      str,
+      spd,
+      vit,
+    },
+    isSynergyMultiplierEnabled,
+  );
 
   // 상태 변경 시 전역 상태 업데이트
   useEffect(() => {
@@ -43,8 +52,9 @@ const Level = () => {
     updateDpsState("vit", vit);
     // 계산된 시너지를 전역 상태에 저장하여 useFinalStats에서 참조 가능하게 함
     updateDpsState("synergyBonuses", synergyBonuses);
+    updateDpsState("isSynergyMultiplierEnabled", isSynergyMultiplierEnabled);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, str, spd, vit, synergyBonuses]);
+  }, [level, str, spd, vit, synergyBonuses, isSynergyMultiplierEnabled]);
 
   // 사용 가능한 총 포인트 (레벨)
   const totalPoints = Math.max(0, level);
@@ -225,9 +235,35 @@ const Level = () => {
       </Paper>
 
       <Paper sx={styles.section}>
-        <Typography variant="h6" gutterBottom>
-          활성화된 시너지
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 1,
+          }}
+        >
+          <Typography variant="h6" sx={{ m: 0 }}>
+            활성화된 시너지
+          </Typography>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isSynergyMultiplierEnabled}
+                onChange={(e) => setIsSynergyMultiplierEnabled(e.target.checked)}
+                color="primary"
+                size="small"
+              />
+            }
+            label={
+              <Typography variant="body2" sx={{ fontWeight: "medium" }}>
+                시너지 효과 1.5배 적용
+              </Typography>
+            }
+            labelPlacement="start"
+            sx={{ m: 0 }}
+          />
+        </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           {activeSynergies && activeSynergies.length > 0 ? (
             activeSynergies.map((synergy) => (
